@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -92,62 +40,84 @@ VOID LangEU_PhTrans::fgrp2agrp(UttPh &u,UttI fg)
 {
 	//primero ponemos frontera y tipo de AGRP
 	for(UttI p=u.wordFirst(fg,URANGE_FGRP);p!=0;p=u.wordNext(p,URANGE_FGRP)){
-		//por defecto frontera acentual de tipo 2
-		DEBUG()
-		u.cell(p).setAGrp(AGRP_EU_OROK);
-		//y si cumple alguno de los siguientes casos la cambiamos
-		DEBUG()
-		if(acento_texto(u,p)){
-			u.cell(p).setAGrp(AGRP_EU_TXT);
-		}
-/*EVA!!! Los enclíticos sólo tienen que ir no acentuados si hay alguna
-palabra delante en su mismo FGrp, a la que se 'pegan'*/
-		if(es_enclitico(u,p)&&(u.cell(p).getFGrp()==GF_EU_NONE)){
-			u.cell(p).setAGrp(AGRP_EU_NONE);
-		}
-		DEBUG()
-		if(es_marcada(u,p)){
-			DEBUG()
-			u.cell(p).setAGrp(AGRP_EU_MRK);
-		}
-		DEBUG()
-		if(es_verbo_jok(u,p)&&es_bisilabo(u,p)&&es_ko_go_ten_tzen(u,p)){
-			//tb que es verbo
-			//hay que verificar que la raiz es monosilabica
-			DEBUG()
-			u.cell(p).setAGrp(AGRP_EU_MRK);
-		}
-		DEBUG()
-		if(es_lotura(u,p)){
-			u.cell(p).setAGrp(AGRP_EU_GABE);
-		}
-		DEBUG()
-		if(es_proclitico(u,p)){//pero solo en caso de que el siguiente sea lgn o trn
-			//u.cell(p).setAGrp(AGRP_EU_OROK);
-			if((p=u.wordNext(p,URANGE_FGRP))!=NULL){
-				if(es_verbo_trn(u,p)||es_verbo_lgn(u,p))
-					u.cell(p).setAGrp(AGRP_EU_NONE);
-				else
+		//Agustin, cambio para el diccionario especial
+		if(StressDicSingleWords){
+			if(es_bisilabo(u,p)){// Si la palabra es bisilaba y la segunda silaba es "astuna" (pesada) se acentua en esa
+				UttI syl = u.syllableLast(p,URANGE_WORD);
+				BOOL astuna=es_astuna(u,syl);
+				if(astuna){
 					u.cell(p).setAGrp(AGRP_EU_OROK);
-			}
-		}
-		else if(es_verbo_jok(u,p)){
-			DEBUG()
-			//u.cell(p).setAGrp(AGRP_EU_OROK);
-			if((p=u.wordNext(p,URANGE_FGRP))!=NULL){
-				DEBUG()
-				if(es_monosilabo(u,p)&&es_verbo_lgn(u,p)){
-					DEBUG()
-					u.cell(p).setAGrp(AGRP_EU_NONE);
 				}
-				else
-					u.cell(p).setAGrp(AGRP_EU_OROK);
-
+				else{//Si la ultima silaba no es astuna se acentua en la primera
+				u.cell(p).setAGrp(AGRP_EU_MRK);}
+			//"eliminar" la última silaba y acentuar la segunda empezando por el principio o la que quede.
+			//Las posibilidades de bisilabo ya se han tenido en cuenta, así que si no es monosílabo se acentuará en la última	
+			}else {
+				u.cell(p).setAGrp(AGRP_EU_OROK);				
+			//Si En cambio si sí es monosílabo se acentua 
 			}
+
 		}
-		DEBUG()
+		else{
+			//por defecto frontera acentual de tipo 2
+			DEBUG()
+			u.cell(p).setAGrp(AGRP_EU_OROK);
+			//y si cumple alguno de los siguientes casos la cambiamos
+			DEBUG()
+			if(acento_texto(u,p)){
+				u.cell(p).setAGrp(AGRP_EU_TXT);
+			}
+	/*EVA!!! Los enclíticos sólo tienen que ir no acentuados si hay alguna
+	palabra delante en su mismo FGrp, a la que se 'pegan'*/
+			if(es_enclitico(u,p)&&(u.cell(p).getFGrp()==GF_EU_NONE)){
+				u.cell(p).setAGrp(AGRP_EU_NONE);
+			}
+			DEBUG()
+			if(es_marcada(u,p)){
+				DEBUG()
+				u.cell(p).setAGrp(AGRP_EU_MRK);
+			}
+			DEBUG()
+			if(es_verbo_jok(u,p)&&es_bisilabo(u,p)&&es_ko_go_ten_tzen(u,p)){
+				//tb que es verbo
+				//hay que verificar que la raiz es monosilabica
+				DEBUG()
+				u.cell(p).setAGrp(AGRP_EU_MRK);
+			}
+			DEBUG()
+			if(es_lotura(u,p)){
+				u.cell(p).setAGrp(AGRP_EU_GABE);
+			}
+			DEBUG()
+			if(es_proclitico(u,p)){//pero solo en caso de que el siguiente sea lgn o trn
+				//u.cell(p).setAGrp(AGRP_EU_OROK);
+				if((p=u.wordNext(p,URANGE_FGRP))!=NULL){
+					if(es_verbo_trn(u,p)||es_verbo_lgn(u,p))
+						u.cell(p).setAGrp(AGRP_EU_NONE);
+					else
+						u.cell(p).setAGrp(AGRP_EU_OROK);
+				}
+			}
+			else if(es_verbo_jok(u,p)){
+				DEBUG()
+				//u.cell(p).setAGrp(AGRP_EU_OROK);
+				if((p=u.wordNext(p,URANGE_FGRP))!=NULL){
+					DEBUG()
+					if(es_monosilabo(u,p)&&es_verbo_lgn(u,p)){
+						DEBUG()
+						u.cell(p).setAGrp(AGRP_EU_NONE);
+					}
+					else
+						u.cell(p).setAGrp(AGRP_EU_OROK);
+
+				}
+			}
+			
+		}	
+			DEBUG()
 	}
 	DEBUG()
+	
 }
 /***************************************************************************/
 VOID LangEU_PhTrans::agrp_stress(UttPh &u,UttI ag)

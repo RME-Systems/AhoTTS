@@ -1,3 +1,38 @@
+/**********************************************************/
+/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
+/*
+(C) 1997 TSR/Aholab - ETSII/IT Bilbao (UPV/EHU)
+
+Nombre fuente................ tts_io.cpp
+Nombre paquete............... Sinte
+Lenguaje fuente.............. C++
+Estado....................... -
+Dependencia Hard/OS.......... -
+Codigo condicional........... -
+
+Codificacion................. Borja Etxebarria
+.............................
+
+Version  dd/mm/aa  Autor     Proposito de la edicion
+-------  --------  --------  -----------------------
+1.0.1	 22/06/24  Jon       Añadir Idioma externo	
+1.0.1    02/10/11  inaki     add transcription API
+1.0.0    31/01/00  borja     codefreeze aHoTTS v1.0
+0.0.0    06/02/98  borja     Codificacion inicial.
+
+======================== Contenido ========================
+<DOC>
+Interfaz de usuario del modulo de sintesis HTTS.
+
+
+Conjunto de parametros SET/GET soportados:
+------------------------------------------
+Ocupa bastante, ver el fichero setget.txt.
+</DOC>
+===========================================================
+*/
+/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
+/**********************************************************/
 /******************************************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
@@ -50,40 +85,7 @@ GPL-3.0+
 
 //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /******************************************************************************/
-/**********************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/*
-(C) 1997 TSR/Aholab - ETSII/IT Bilbao (UPV/EHU)
 
-Nombre fuente................ tts_io.cpp
-Nombre paquete............... Sinte
-Lenguaje fuente.............. C++
-Estado....................... -
-Dependencia Hard/OS.......... -
-Codigo condicional........... -
-
-Codificacion................. Borja Etxebarria
-.............................
-
-Version  dd/mm/aa  Autor     Proposito de la edicion
--------  --------  --------  -----------------------
-1.0.1    02/10/11  inaki     add synthesize API
-1.0.0    31/01/00  borja     codefreeze aHoTTS v1.0
-0.0.0    06/02/98  borja     Codificacion inicial.
-
-======================== Contenido ========================
-<DOC>
-Interfaz de usuario del modulo de sintesis HTTS.
-
-
-Conjunto de parametros SET/GET soportados:
-------------------------------------------
-Ocupa bastante, ver el fichero setget.txt.
-</DOC>
-===========================================================
-*/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/**********************************************************/
 
 #include <assert.h>
 #include "htts.hpp"
@@ -475,7 +477,25 @@ los parametros que se pueden enviar. */
 BOOL HTTS::set( const CHAR* param, const CHAR* val )
 /*</DOC>*/
 {
+	#ifdef HTTS_LANG_EX
+		if (!strcmp(param,"Lang") && strcmp(val,"es") && strcmp(val,"eu")) {
+			if(!strcmp(val,"gl")){//ANADIR AQUI IDIOMAS EXTRA
+				data->set("Langext",val);
+				return data->set(param,"ex");
+			}else
+			if(!strcmp(val,"ca")){
+				data->set("Langext",val);
+				return data->set(param,"ex");
+			}else{
+				htts_error("Error.Unknown Lang");
+			}
+		}
+		else{
+	#endif
 	return data->set(param,val);
+	#ifdef HTTS_LANG_EX
+		}
+	#endif
 }
 
 /*<DOC>*/
@@ -678,3 +698,4 @@ VOID HTTS_SetWarnFunc( HTTS_MsgFunc *f )
 //}
 
 /***********************************************************/
+

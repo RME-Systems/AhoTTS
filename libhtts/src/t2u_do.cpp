@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -83,7 +31,30 @@ modulo de paso de texto a lista Utt
 #include "chset.h"
 #include "t2u.hpp"
 
+
+
 /**********************************************************/
+
+
+//ISC Detectamos puntuación
+BOOL ispunt(CHAR ch)
+{
+	//ISC CHAR *simbpunt = (char *)".?!:;,()- " CS_S_iquest; //Quitamos este por problesma con á en UTF8 C2 A1 A1==CS_S_iexcl;
+	CHAR *simbpunt = (char *)".?!:;,()- \"" CS_S_iquest; //Quitamos este por problesma con á en UTF8 C2 A1 A1==CS_S_iexcl;
+
+	if (strchr(simbpunt, ch))
+		return TRUE;
+	return FALSE;
+}
+
+/**********************************************************/
+
+
+/**********************************************************/
+
+
+
+
 
 BOOL istext(CHAR ch)
 {
@@ -115,9 +86,8 @@ INT T2ULst::entrada_cadena(const CHAR * str)
 	BOOL inword;	// estado (TRUE si estamos dentro de palabra)
 	INT wstart;		// comienzo de la palabra actual
 	BOOL eou;	// marca fin de utterance
-
+	//fprintf(stderr,"esta entrando %s \n",str);
 	inword = (buffin[0] != '\0');  //si teniamos un trozo de palabra
-
 	if (!str) {  // flush!
 		if (inword) {
 			p = uttappend(buffin, "", 0, 0);  // salva posibles despojos
@@ -133,12 +103,14 @@ INT T2ULst::entrada_cadena(const CHAR * str)
 		sentence = 0;
 		return 0;
 	}
-
 	eou = FALSE;
 	pos = 0;
 	wstart = 0;
+
 	while ((!eou) && (str[pos])) {
-		if (istext(str[pos])) {		// es una letra?
+//*ISC		if (istext(str[pos])) {		// es una letra?
+//fprintf(stderr,"%c\t%x\n",str[pos],str[pos]);
+		if (!(ispunt(str[pos]))) {		// es una letra?
 			if (!inword) {	// si encontramos palabra nueva
 				wstart = pos;	// salvamos posicion de comienzo
 				inword = TRUE;	// marca que estamos en una palabra
@@ -148,16 +120,20 @@ INT T2ULst::entrada_cadena(const CHAR * str)
 					sentence = 0;
 				}
 			}
+	
 		}
 		else {	// es un espacio o signo de puntuacion
 			punc = selectpunc(punc, str[pos], &eou);	// refresca punc
+
 			if (inword) {	// si estabamos en palabra => fin palabra
 				p = uttappend(buffin, str, wstart, pos);	// salva palabra
 				if (!sentence)
 					sentence = p;	// recuerda frase si no la teniamos ya
 				inword = FALSE;		// marca que ya no estamos en una palabra
 			}
+			
 		}
+		
 		pos++;	// sig. caracter
 	}
 
@@ -198,16 +174,16 @@ UttI T2ULst::uttappend(CHAR * buffin, const CHAR * str, INT strstart,
 
 	if (n + lb == 0)
 		return 0;
-
 	/* formar palabra {buffin}+{cacho_de_str} */
 	CHAR *s = (CHAR *) malloc(sizeof(CHAR) * (lb + n + 1));
 	strcpy(s, buffin);
 	if (n)
 		strncpy(s + lb, str + strstart, n);
 	s[lb + n] = '\0';
-
 	/* anyadir la palabra a la utterance */
+		
 	UttI c = utt->cellAppend();
+	
 	utt->cell(c).setWord(s);
 	free(s);
 	buffin[0] = '\0';
@@ -232,6 +208,7 @@ VOID T2ULst::updatepunc(UttI sentc, INT punc)
 	case '(': s=USENTENCE_PAUSE; break;
 	case ')': s=USENTENCE_PAUSE; break;
 	case '-': s=USENTENCE_PAUSE; break;
+	case '"': s=USENTENCE_PAUSE; break; //ISC tratamos las comillas como pausa
 	case CS_iquest: s=USENTENCE_PAUSE; break;
 	case CS_iexcl: s=USENTENCE_PAUSE; break;
 	default:
@@ -251,7 +228,7 @@ VOID T2ULst::updatepunc(UttI sentc, INT punc)
 INT T2ULst::selectpunc(INT punc, INT newpunc, INT * eof)
 {
 	// todos ordenados por prioridad (para machacarse mutuamente si hace falta)
-	CHAR *sortedall = (char *)".?!:;,()-" CS_S_iquest CS_S_iexcl;
+	CHAR *sortedall = (char *)".?!:;,()-'\"" CS_S_iquest CS_S_iexcl;
 	// los que provocan fin de utterance
 	CHAR *endofutt = (char *)".:;!?" CS_S_iexcl CS_S_iquest;
 	CHAR *s;

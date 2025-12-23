@@ -223,7 +223,7 @@ int main (int argc, char* argv[])
 					if(tts->input_multilingual(str, lang, data_path, FALSE)){
 						short *samples;
 						int len=0;
-						while((len = tts->output_multilingual(lang, &samples)) != 0){
+						while((len = tts->output_multilingual(lang, &samples)) != -1){  //-1 means that all the input has been processed (added by me). Returns 0 if no samples generated
 							fout.setBlk(samples, len);
 							free(samples);
 						}

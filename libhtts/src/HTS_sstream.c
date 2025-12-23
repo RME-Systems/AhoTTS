@@ -59,7 +59,18 @@ HTS_SSTREAM_C_START;
 
 /* hts_engine libraries */
 #include "HTS_hidden.h"
+
+#ifdef FIXSILS
+// derro: la etiqueta FIXSILS (fijar duracion de silencios inicial y final, asumiendo que SIEMPRE los hay) esta definida (o no) en HTS_engine.h
+#define SILINI 0.1  // silencio inicial en segundos
+#define SILEND 0.4  // silencio final en segundos
+#endif
+
+#ifdef FUSION
+// derro: la etiqueta FUSION (combinar duraciones HTS con las halladas en las labels) esta definida (o no) en HTS_engine.h
 #include <string.h> //inaki, para usar strstr
+#endif
+
 static void HTS_set_duration(int *duration, double *mean, double *vari,
                              double *remain, int size, double frame_length)
 {
@@ -68,11 +79,11 @@ static void HTS_set_duration(int *duration, double *mean, double *vari,
    // - SI VIENE ESPECIFICADA, SE DISTRIBUYE EN PROPORCION A LAS MEDIAS
    // - LO QUE EXCEDE 2 VECES LA SUMA DE MEDIAS VA AL ESTADO CENTRAL
    // - LA VARIANZA SE IGNORA DEBIDO A LOS PROBLEMAS QUE OCASIONA
+   // - proteccion contra duraciones <1 (podria ocurrir para voces procedentes de adaptacion) 
 
    int i;
    double temp1, temp2;
    double rho;
-
 
    if (frame_length == 0.0) {
       // no se especifica, sí que se usa la media
@@ -98,6 +109,11 @@ static void HTS_set_duration(int *duration, double *mean, double *vari,
          *remain = temp1 - (double) duration[i];
       }
    }
+   
+   // proteccion
+   for (i = 0; i < size; i++)
+      if (duration[i] < 1)
+         duration[i] = 1;
 }
 
 /* HTS_SStreamSet_initialize: initialize state stream set */
@@ -112,9 +128,16 @@ void HTS_SStreamSet_initialize(HTS_SStreamSet * sss)
 }
 
 /* HTS_SStreamSet_create: parse label and determine state duration */
+#ifndef FIXSILS
 HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms,
                            HTS_Label * label, double *duration_iw,
                            double **parameter_iw, double **gv_iw)
+#else
+// derro: esta incluye los frames por segundo
+HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms,
+                           HTS_Label * label, double *duration_iw,
+                           double **parameter_iw, double **gv_iw, double frps)
+#endif
 {
    int i, j, k;
    double temp1, temp2;
@@ -125,7 +148,11 @@ HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms,
    double frame_length;
    int next_time;
    int next_state;
-   int FUSION = 0; //Inaki, para fusionar duraciones
+   //int FUSION = 0; //Inaki, para fusionar duraciones
+   int SOLO_MODIF_PAUSAS = 1; //inaki para solo modificar externamente la duración de las pausas
+#ifdef FUSION
+   double dur_mean, difference;
+#endif
 
    /* initialize state sequence */
    sss->nstate = HTS_ModelSet_get_nstate(ms);
@@ -191,19 +218,103 @@ HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms,
       HTS_ModelSet_get_duration(ms, HTS_Label_get_string(label, i),
                                 &duration_mean[i * sss->nstate],
                                 &duration_vari[i * sss->nstate], duration_iw);
-   if (HTS_Label_get_frame_specified_flag(label)) {
+   if (HTS_Label_get_frame_specified_flag(label) && !SOLO_MODIF_PAUSAS) {
 	   float difference = 0.0;
       /* use duration set by user */
       next_time = 0;
       next_state = 0;
       state = 0;
-      
-	  ////////////////////INAKI-START
-      if (FUSION == 1){
-	      HTS_set_duration(sss->duration, duration_mean, duration_vari, //inaki: predecir duraciones con HTS, para luego combinarlas con las externas y forzarlas
+
+#ifdef FUSION
+      //inaki: predecir duraciones con HTS, para luego combinarlas con las externas y forzarlas
+	  HTS_set_duration(sss->duration, duration_mean, duration_vari,
                        &duration_remain,
-        	               HTS_Label_get_size(label) * sss->nstate, 0);
+                       HTS_Label_get_size(label) * sss->nstate, 0);
+      difference = 0.0;
+      for (i = 0; i < HTS_Label_get_size(label); i++) {
+         temp1 = HTS_Label_get_start_frame(label, i) + difference;
+         temp2 = HTS_Label_get_end_frame(label, i) + difference;
+#else
+      for (i = 0; i < HTS_Label_get_size(label); i++) {
+         temp1 = HTS_Label_get_start_frame(label, i);
+         temp2 = HTS_Label_get_end_frame(label, i);
+#endif
+
+#ifdef FUSION
+         // dur_mean = duración predicha por HTS para un fonema
+         for (dur_mean = 0.0, j = 0; j < sss->nstate; j++)
+            dur_mean = dur_mean + sss->duration[i*sss->nstate + j];
+ 			// fprintf(stderr,"i=%d\tstart=%f\tend=%f\tend-start=%f\tduration_mean=%f\tdifference=%f\n", i, temp1, temp2, temp2-temp1, dur_mean, difference);
+			// derro (IMPORTANTE): la fusion introduce fuertes dependencias foneticas, de modo que seria mejor no aplicarla en el caso general
+       if (strstr(HTS_Label_get_string(label, i), "-_+") == NULL) {
+            //cuando no sea pausa ("_"), combinamos las duraciones; si es pausa, forzamos la duración externa
+            if (strstr(HTS_Label_get_string(label, i), "-AP+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-OP+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-eX+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-nE+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-3P_+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-iP+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-IX+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-lE+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-mE+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-UX+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-uP+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-XU+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-X+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-K+") != NULL ||
+              //strstr(HTS_Label_get_string(label, i), "-_+") != NULL || // derro: este caso ya estaba descartado arriba!!
+                strstr(HTS_Label_get_string(label, i), "-aU+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-aI+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-e+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-eI+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-I+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-j+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-OI+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-U+") != NULL ||
+                strstr(HTS_Label_get_string(label, i), "-V+") != NULL) {
+               // si vocal combinamos las duraciones pero con menos peso para HTS
+			//fprintf(stderr,"\tlabel_string=%s\n", HTS_Label_get_string(label, i));
+				difference +=  0.9*(temp2-temp1) + 0.1*(dur_mean) - (temp2-temp1); //para actualizar los tiempos externos respecto a la diferencia acumulada con la combinación
+				temp2 = 0.9*temp2+ 0.1*(temp1 + dur_mean); //combinamos
+			}else{
+				difference +=  0.7*(temp2-temp1) + 0.3*(dur_mean) - (temp2-temp1); //para actualizar los tiempos externos respecto a la diferencia acumulada con la combinación
+				temp2 = 0.7*temp2+ 0.3*(temp1 + dur_mean); //combinamos
+			}
+	    	}
+#endif
+		///////////////////INAKI-END
+        if (temp2 >= 0) {
+           HTS_set_duration(&sss->duration[next_state],
+                             &duration_mean[next_state],
+                             &duration_vari[next_state], &duration_remain,
+                             state + sss->nstate - next_state,
+                             temp2 - next_time);
+            for (j = next_state; j < state + sss->nstate; j++)
+               next_time += sss->duration[j];
+            next_state = state + sss->nstate;
+         } else if (i + 1 == HTS_Label_get_size(label)) {
+            HTS_set_duration(&sss->duration[next_state],
+                             &duration_mean[next_state],
+                             &duration_vari[next_state], &duration_remain,
+                             state + sss->nstate - next_state, 0.0);
+         }
+         state += sss->nstate;
       }
+   }
+     //////////////////
+   else if (HTS_Label_get_frame_specified_flag(label) && SOLO_MODIF_PAUSAS) { //solo utilizar la duración externa para las pausas
+	   float difference = 0.0;
+	  // fprintf(stderr, "external dur pause\n");
+      /* use duration set by user */
+      next_time = 0;
+      next_state = 0;
+      state = 0;
+#ifdef FUSION
+	  ////////////////////INAKI-START
+      HTS_set_duration(sss->duration, duration_mean, duration_vari, //inaki: predecir duraciones con HTS, para luego combinarlas con las externas y forzarlas
+                   &duration_remain,
+                    HTS_Label_get_size(label) * sss->nstate, 0);
+
 	  ///////////INAKI-END
       for (i = 0; i < HTS_Label_get_size(label); i++) {
 		float dur_mean=0;
@@ -211,31 +322,23 @@ HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms,
          temp1 = HTS_Label_get_start_frame(label, i) + difference;
          temp2 = HTS_Label_get_end_frame(label, i) + difference;
 		 ////////////////////INAKI-START
-      	 if (FUSION == 1){
-         
-	         for(ii=0; ii<sss->nstate; ++ii)
-			dur_mean = dur_mean + sss->duration[i*sss->nstate + ii]; //duración predicha por HTS para un fonema
- 			// fprintf(stderr,"i=%d\tstart=%f\tend=%f\tend-start=%f\tduration_mean=%f\tdifference=%f\n", i, temp1, temp2, temp2-temp1, dur_mean, difference);
-		if(strstr(HTS_Label_get_string(label, i), "-_+") == NULL){ //cuando no sea pausa "_", combinamos las duraciones. Si es pausa, forzamos la duración externa
-			if(strstr(HTS_Label_get_string(label, i), "-AP+" )!=NULL
-			|| strstr(HTS_Label_get_string(label, i), "-OP+") != NULL || strstr(HTS_Label_get_string(label, i), "-eX+") != NULL || strstr(HTS_Label_get_string(label, i), "-nE+") != NULL 
-			|| strstr(HTS_Label_get_string(label, i), "-3P_+") != NULL || strstr(HTS_Label_get_string(label, i), "-iP+") != NULL || strstr(HTS_Label_get_string(label, i), "-IX+") != NULL
-			|| strstr(HTS_Label_get_string(label, i), "-lE+") != NULL || strstr(HTS_Label_get_string(label, i), "-mE+") != NULL || strstr(HTS_Label_get_string(label, i), "-UX+") != NULL 
-			|| strstr(HTS_Label_get_string(label, i), "-uP+") != NULL || strstr(HTS_Label_get_string(label, i), "-XU+") != NULL || strstr(HTS_Label_get_string(label, i), "-X+") != NULL
-			|| strstr(HTS_Label_get_string(label, i), "-K+") != NULL || strstr(HTS_Label_get_string(label, i), "-_+") != NULL || strstr(HTS_Label_get_string(label, i), "-aU+") != NULL
-			|| strstr(HTS_Label_get_string(label, i), "-aI+") != NULL || strstr(HTS_Label_get_string(label, i), "-e+") != NULL || strstr(HTS_Label_get_string(label, i), "-eI+") != NULL
-			|| strstr(HTS_Label_get_string(label, i), "-I+") != NULL || strstr(HTS_Label_get_string(label, i), "-j+") != NULL || strstr(HTS_Label_get_string(label, i), "-OI+") != NULL
-			|| strstr(HTS_Label_get_string(label, i), "-U+") != NULL || strstr(HTS_Label_get_string(label, i), "-V+") != NULL){ //si vocal combinamos las duraciones pero con menos peso para HTS
-			//fprintf(stderr,"\tlabel_string=%s\n", HTS_Label_get_string(label, i));
-				difference +=  0.9*(temp2-temp1) + 0.1*(dur_mean) - (temp2-temp1); //para actualizar los tiempos externos respecto a la diferencia acumulada con la combinación
-				temp2 = 0.9*temp2+ 0.1*(temp1 + dur_mean); //combinamos
-			}else{
-				difference +=  0.7*(temp2-temp1) + 0.3*(dur_mean) - (temp2-temp1); //para actualizar los tiempos externos respecto a la diferencia acumulada con la combinación
-				temp2 = 0.7*temp2+ 0.3*(temp1 + dur_mean); //combinamos	
-			}
-	    	}
-	}
+		 if(strstr(HTS_Label_get_string(label, i), "-_+") != NULL){ //cuando sea pausa "_" se usa la duración externa
+			//fprintf(stderr,"\tdur_pause=%f\ttemp1=%f\ttemp2=%f\n", temp2-temp1, temp1, temp2);
+			temp2= next_time + temp2 - temp1;
+		 }
+		 else{
+			for(ii=0; ii<sss->nstate; ++ii)
+				dur_mean = dur_mean + sss->duration[i*sss->nstate + ii]; //duración predicha por HTS para un fonema
+			dur_mean /= HTS_Label_get_speech_speed(label);
+			temp2= next_time + dur_mean;
+		 }
+
 		///////////////////INAKI-END
+#else
+      for (i = 0; i < HTS_Label_get_size(label); i++) {
+         temp1 = HTS_Label_get_start_frame(label, i);
+         temp2 = HTS_Label_get_end_frame(label, i);
+#endif
         if (temp2 >= 0) {
            HTS_set_duration(&sss->duration[next_state],
                              &duration_mean[next_state],
@@ -256,15 +359,46 @@ HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms,
    } else {
       /* determine frame length */
       if (HTS_Label_get_speech_speed(label) != 1.0) {
-         temp1 = 0.0;
+         // by derro: cambio esto para evitar el uso de frame_length, porque
+		 //           la funcion HTS_set_duration ha sido modificada para la voz cantada
+		 //           y ahora mismo tiene que ser llamada fonema a fonema si frame_length!=0.0
+		 for (i = 0; i < HTS_Label_get_size(label) * sss->nstate; i++)
+            duration_mean[i] /= HTS_Label_get_speech_speed(label);
+         frame_length = 0.0;
+      /* temp1 = 0.0;
          for (i = 0; i < HTS_Label_get_size(label) * sss->nstate; i++) {
             temp1 += duration_mean[i];
          }
-         frame_length = temp1 / HTS_Label_get_speech_speed(label);
+         frame_length = temp1 / HTS_Label_get_speech_speed(label); */
       } else {
          frame_length = 0.0;
       }
-      /* set state duration */
+
+#ifdef FIXSILS
+      // derro: fijar la duracion de los silencios inicial y final, asumiendo que SIEMPRE estaran presentes
+	  //        (solo cuando no me fijan las duraciones a la entrada)
+      temp1 = temp2 = 0.0;
+      j = HTS_Label_get_size(label) * sss->nstate - 1;
+      // calcular la duracion teorica de los silencios
+      for (i = 0; i < sss->nstate; i++) {
+         temp1 += duration_mean[i];
+         temp2 += duration_mean[j-i];
+      }
+      // factor por el que hay que multiplicar para que las duraciones sean las deseadas
+      temp1 = SILINI * frps / temp1;
+      temp2 = SILEND * frps / temp2;
+	  // si hace falta escalamos la duracion del silencio final, pero nunca la del inicial
+	  if (HTS_Label_get_speech_speed(label) != 1.0)
+         temp2 /= HTS_Label_get_speech_speed(label);
+      // multiplicar por el factor calculado
+      for (i = 0; i < sss->nstate; i++) {
+         duration_mean[i] *= temp1;
+	     duration_mean[j-i] *= temp2;
+      }
+	  // ahora, con las medias tuneadas, puedo llamar a la funcion de duraciones
+#endif
+
+	  /* set state duration */
       HTS_set_duration(sss->duration, duration_mean, duration_vari,
                        &duration_remain,
                        HTS_Label_get_size(label) * sss->nstate, frame_length);

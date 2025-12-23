@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -147,7 +95,11 @@ VOID LangEU_Pauses::utt_pauses(UttWS & ut)
 	if (!strcmp(pau_model,"Pau1")) utt_pau1(ut); else
 #endif
 #ifdef HTTS_EU_PAU2
+#ifdef USE_TOKENIZER
 	if (!strcmp(pau_model,"Pau2")) utt_pau2(ut); else
+#else
+	if (!strcmp(pau_model,"Pau2")) utt_pau1(ut); else
+#endif
 #endif
 	htts_error("Invalid LangEU_Pauses::pau_model (%s)",(const CHAR*)pau_model);
 }
@@ -210,11 +162,11 @@ const CHAR *LangEU_Pauses::get( const CHAR *param )
 VOID LangEU_Pauses::utt_n_val_pause(UttPh & ut)//Aritz
 {
 	UttI q,r,s;
-
+		
 	int val_etiq;
-
-
-
+	
+	
+	
 	for(q=ut.wordFirst();q!=0;q=ut.wordNext(q))
 		{
 			//Hay que añadirle la etiqueta a la palabra anterior
@@ -225,12 +177,12 @@ VOID LangEU_Pauses::utt_n_val_pause(UttPh & ut)//Aritz
 					ut.cell(r).setPhone('_');
 					//ut.cell(r).setPause(UPAUSE_SNEUTR);//Para que la pausa sea UPAUSE_SNEUTR
 					ut.cell(r).setDur(val_etiq);
-
+					
 			}
-
+		
 		}
-
-
+	
+	
 }
 #endif
 /************************************************************/

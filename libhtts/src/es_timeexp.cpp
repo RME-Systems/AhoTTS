@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -86,7 +34,7 @@ del d¡a. Ej:
 
 Dice los cuartos e y media, además de decir "menos..."
 
-
+  
 inigos
 ===========================================================
 */
@@ -155,7 +103,7 @@ CtI LangES_TextToList::exptimeHM(CtI p)
   		hours-=12;
 		manhana = FALSE;
 	}
-
+	
 	if(hours==1)
 	{
 		p = ct.insafter(p, (char *)"una", FALSE, emotion, emo_intensity);//inaxio-> emotion eta emo_intensity gehitu
@@ -245,7 +193,7 @@ CtI LangES_TextToList::exptimeHM(CtI p)
 			p = ct.insafter(p, es_mornStr, FALSE, emotion, emo_intensity);//inaxio-> emotion eta emo_intensity gehitu
 		}
 	}
-
+	
 	q=ct.next(q);
 	ct.setPatternForce(q, (char *)"l");
 	ct.setStatus(q, stat);
@@ -253,7 +201,7 @@ CtI LangES_TextToList::exptimeHM(CtI p)
 
 	q=ct.prevGrp(q);
 	q=ct.delGrp(q);
-
+		
 	return q;
 }
 

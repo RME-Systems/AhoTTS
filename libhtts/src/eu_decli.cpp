@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -123,7 +71,7 @@ Yon2.
 */
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /**********************************************************/
-
+ 
 /**********************************************************/
 
 #include <stdio.h>
@@ -197,8 +145,8 @@ CtI LangEU_TextToList::dekline( CtI p)
 	dek = ct(q).str;
 	q = ct.prev(q);
 
-
-
+	
+	
 	temp = (ct(q).str)[strlen(ct(q).str) - 1];
 	lastDekd = isVowel(temp)?uniqVowel(temp):uniqConso(temp);
 	temp = dek[0];
@@ -212,7 +160,7 @@ CtI LangEU_TextToList::dekline( CtI p)
 
 	// a + a = a   a + e = e
 	if (lastDekd == 'a')
-		switch(firstDek)
+		switch(firstDek)  
 	{
       case 'a':
 		  dek = &(dek[1]);
@@ -240,9 +188,9 @@ CtI LangEU_TextToList::dekline( CtI p)
 	// v + v = v + r + v
 	//  else if (isVowel(lastDekd) && isVowel(firstDek))
 	//         q = ct.extendStr(q, "r");
-
+	
 	q = ct.extendStr(q, dek);
-
+	
 	//eliminamos la celda de declinaci¢n.
 	ct.del(ct.next(q));
 	return p;

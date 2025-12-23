@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -71,7 +19,7 @@ Codificacion................. Inma Sardon
 GALDEG.CPP fuente para calificar grupos funcionales como galdegaia
 
 2005/04/11-an egindako aldaketak:
-	set_up_flag funtzioaren baitan aldaketa batzuk egin dira. "flag"-en ezarpena ez zen guztiz ondo egiten eta batzuetan irakurri
+	set_up_flag funtzioaren baitan aldaketa batzuk egin dira. "flag"-en ezarpena ez zen guztiz ondo egiten eta batzuetan irakurri 
 	ezinak ziren tokietan informazioa irakurtzen zaiatzen zen, ondorioz ".pho" fitxategia ez zen guztiz sortzen.
 </DOC>
 ==================================================================================
@@ -164,11 +112,11 @@ int FGrp_next=0,FGrp_act=0;
 				p_FGrp_next=u.fgrpNext(p);
 				FGrp_next = u.cell(p_FGrp_next).getFGrp();
 				FGrp_act = u.cell(p).getFGrp();
-/* EVA -> Si la frase empieza por verbo, esa es la galdegaia*/
+/* EVA -> Si la frase empieza por verbo, esa es la galdegaia*/	
 			if (p==u.fgrpFirst())
 						if (FGrp_act==GF_EU_ADI)
 							u.cell(p).setFGrp(GF_EU_GALDE);
-
+ 
 				if ( (FGrp_next==GF_EU_ADI) && (FGrp_act==GF_EU_ARRUN))
 					if ( !(u.cell(p).queryPOS(POS_EU_LOT_JNT)) ||
 						!(u.cell(p).queryPOS(POS_EU_LOT_AZK)) )

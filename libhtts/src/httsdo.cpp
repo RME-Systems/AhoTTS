@@ -1,9 +1,10 @@
 /******************************************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
-AhoTTS: A Text-To-Speech system for Basque*, developed by Aholab 
-Signal Processing Laboratory at the University of the Basque Country (UPV/EHU). 
-Its acoustic engine is based on hts_engine** and it uses AhoCoder'' as vocoder.
+AhoTTS Multilingual: A Text-To-Speech system for Basque*, Spanish*, Galician',
+Catalan^ and English^^, developed by Aholab Signal Processing Laboratory at the
+University of the Basque Country (UPV/EHU). Its acoustic engine is based on
+hts_engine** and it uses AhoCoder'' as vocoder.
 (Read COPYRIGHT_and_LICENSE_code.txt for more details)
 --------------------------------------------------------------------------------
 
@@ -16,9 +17,9 @@ http://aholab.ehu.es/ahocoder/
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Copyrights:
-	*1997-2015  Aholab Signal Processing Laboratory, University of the Basque
+	*1997-2012  Aholab Signal Processing Laboratory, University of the Basque
 	 Country (UPV/EHU)
-    	''2011-2015 Aholab Signal Processing Laboratory, University of the Basque
+    	''2011-2012 Aholab Signal Processing Laboratory, University of the Basque
 	  Country (UPV/EHU)
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -65,7 +66,13 @@ Codificacion................. Borja Etxebarria
 
 Version  dd/mm/aa  Autor     Proposito de la edicion
 -------  --------  --------  -----------------------
-2.0.3	 02/10/11  Inaki     add synthesize API (y soporte para idiomas festival)
+7.0.0    22/12/2025 ISC       ExtLangLing
+4.0.0	 19/12/25  ISC 		 Version using multilingual functions for public repo and non-linux platforms
+3.0.0    09/02/23  Inigo     Integrate Tacotron model
+2.0.4    19/04/12  Agustin   Gallego usando cotovia-ecess y bool InputIsFile para procesar
+* 							usando festival con la entrada siendo una cadena o el nombre de un fichero
+2.0.4	 20/02/12  Agustin   Utt chunking para idiomas festival
+2.0.3	 02/10/11  Inaki     add transcription API (y soporte para idiomas festival)
 2.0.2	 15/12/10  Inaki     integrate HTS Synthesis Method
 2.0.1	 03/10/07  Inaki     integrate Corpus Synthesis Method
 2.0.0    27/06/03  lander    integrate HNS Synthesis Module
@@ -78,6 +85,9 @@ Version  dd/mm/aa  Autor     Proposito de la edicion
 </DOC>
 ===========================================================
 */
+/*IMPORTANTE
+ * hay algunas funciones que estan copiadas de festival, no se
+ * si habra que tener cuidado con la licencia o algo*/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /**********************************************************/
 
@@ -92,25 +102,38 @@ Version  dd/mm/aa  Autor     Proposito de la edicion
 
 #ifdef HTTS_LANG_ES
 #include "es_lingp.hpp"
+#ifdef USE_TOKENIZER
 #include "es_hdic.hpp"
 // #include "es_tex.hpp"  // $$$ aun no hay tokenizer para castellano...
 #include "es_t2l.hpp"  // $$$ EVA YA tenemos tokenizer en castellano
-
-
+#endif
 #endif
 
 #ifdef HTTS_LANG_EU
 #include "eu_lingp.hpp"
+#ifdef USE_TOKENIZER
 #include "eu_hdic.hpp"
 #include "eu_t2l.hpp"
+#endif
+#endif
+
+#ifdef HTTS_LANG_EX
+#include "ex_lingp.hpp"
+#include "t2l.hpp"
+#include "t2u.hpp"
+#include "wrapper.hpp" 
 #endif
 
 
 #ifdef HTTS_METHOD_HTS
 #include "hts.hpp"
 #endif
-
-
+#ifdef HTTS_METHOD_TACO
+#include "taco.hpp"
+#endif
+#ifdef HTTS_METHOD_VITS
+#include "vits.hpp"
+#endif
 /**********************************************************/
 
 #ifdef HTTS_METHVARS
@@ -118,6 +141,16 @@ Version  dd/mm/aa  Autor     Proposito de la edicion
 BOOL __htts_method_hts=TRUE;
 #else
 BOOL __htts_method_hts=FALSE;
+#endif
+#ifdef HTTS_METHOD_TACO
+BOOL __htts_method_taco=TRUE;
+#else
+BOOL __htts_method_taco=FALSE;
+#endif
+#ifdef HTTS_METHOD_VITS
+BOOL __htts_method_vits=TRUE;
+#else
+BOOL __htts_method_vits=FALSE;
 #endif
 #endif
 
@@ -134,14 +167,30 @@ BOOL __htts_lang_eu=TRUE;
 #else
 BOOL __htts_lang_eu=FALSE;
 #endif
+#ifdef HTTS_LANG_EX
+BOOL __htts_lang_ex=TRUE;
+#else
+BOOL __htts_lang_ex=FALSE;
+#endif
 #endif
 
 
+/**********************************************************/
+
+/**********************************************************/
 HTTSDo::HTTSDo( VOID )
 {
 	created=FALSE;
 	flushbuf=0;
+#ifdef USE_TOKENIZER
 	hdic=NULL;
+	#ifdef HTTS_LANG_EX
+		t2u_ex=NULL;
+		tfil=NULL;
+	#endif
+#else
+	tfil=NULL;
+#endif
 	t2u=NULL;
 	lingp=NULL;
 	utt=NULL;
@@ -159,16 +208,30 @@ HTTSDo::HTTSDo( VOID )
 /* El primero definido sera el metodo por defecto */
 #if defined(HTTS_METHOD_HTS) //INAKI
 	smethod = "HTS";
+#elif defined(HTTS_METHOD_TACO)
+	smethod = "Taco";
+#elif defined(HTTS_METHOD_VITS)
+	smethod = "Vits";
 #endif
 
+#ifdef USE_TOKENIZER
 	hdicdbname = "hdic";
+	//sustfn = "sust.txt";
+#endif
 
 
+    //hdicdbname="";
 	modelpth="";
 	dbpros="";
 	modelpow="";
 	modeldur="";
 	modelpau="";
+#ifdef HTTS_LANG_EX
+
+	hdicdbname="";
+	langvariante="";
+
+#endif
 }
 
 /**********************************************************/
@@ -183,11 +246,23 @@ HTTSDo::~HTTSDo( )
 VOID HTTSDo::destroy( VOID )
 {
 #define DELIT(x) if (x) { delete x; x=NULL; }
+#ifdef USE_TOKENIZER
 	DELIT(hdic);
+	#ifdef HTTS_LANG_EX
+		DELIT(t2u_ex);
+		DELIT(tfil);
+	#endif
+#else
+	DELIT(tfil);
+#endif
 	DELIT(t2u);
 	DELIT(lingp);
 	DELIT(utt);
 	DELIT(u2w);
+#ifdef HTTS_LANG_EX
+	DELIT(miWrapper);
+#endif
+
 }
 
 /**********************************************************/
@@ -198,45 +273,124 @@ BOOL HTTSDo::create( VOID * db )
 
 	assert(!created);
 
+#ifdef USE_TOKENIZER
 	assert(!hdic);
+	#ifdef HTTS_LANG_EX
+		assert(!t2u_ex);
+		assert(!tfil);
+	#endif
+#else
+	assert(!tfil);
+#endif
 	assert(!t2u);
 	assert(!lingp);
 	assert(!utt);
 	assert(!u2w);
+#ifdef HTTS_LANG_EX
+	assert(!miWrapper);
+#endif
+
 
 	BOOL ok;
 	const CHAR* npth=NULL;
 	DOUBLE d=0;
 
+#ifndef USE_TOKENIZER
+	t2u = new T2ULst;
+	tfil = new TxtFilt;
+#endif
 
 	ok=FALSE;
+
+
 #ifdef HTTS_LANG_EU
 	if (!strcmp(lang,"eu")) {
 		ok=TRUE;
 		lingp = new LangEU_LingP;
+#ifdef USE_TOKENIZER
 		hdic = new LangEU_HDicDB;
 		t2u = new LangEU_TextToList;
+#else
+		tfil = new TxtFilt;
+		tfil->set("Lang",lang);
+#endif
+
 	}
 #endif
 #ifdef HTTS_LANG_ES
 	if (!strcmp(lang,"es")) {
 		ok=TRUE;
 		lingp = new LangES_LingP;
+#ifdef USE_TOKENIZER	
 		hdic = new LangES_HDicDB;
 		t2u = new LangES_TextToList;  // $$$ EVA como YA hay tokenizer ES ...
-//		t2u = new LangEU_TextToList;  // $$$ ...usamos el tokenizer EU
-
+#else
+		tfil = new TxtFilt;
+		tfil->set("Lang",lang);
+#endif
 	}
 #endif
 
+#ifdef HTTS_LANG_EX
+
+	if (!strcmp(lang,"ex")) {
+		ok=TRUE;
+		lingp = new LangEX_LingP;
+		tfil = new TxtFilt;
+		tfil->set("Lang",lang);
+		miWrapper =new wrapper;
+		miWrapper->set("Lang",langext);
+		miWrapper->set("hdicdbname",hdicdbname);
+		miWrapper->set("lang_variant",langvariante);
+		miWrapper->initialize();
+		tfil->miWrapper=miWrapper;
+		lingp->miWrapper=miWrapper;
+		//tfil->set_wrapper(miWrapper);
+		//lingp->set_wrapper(miWrapper);
+		#ifdef USE_TOKENIZER
+			t2u_ex = new T2ULst;
+		#else
+			t2u = new T2ULst;
+		#endif
+	}
+#endif
+
+
+
 	if (!ok) htts_error("Invalid language (%s)",(const CHAR *)lang);
-
+#ifdef USE_TOKENIZER
+	#ifdef HTTS_LANG_EX
+	if(strcmp(lang,"ex")){
+	#endif
+		if (!(lingp && t2u)) {numerror=1;goto error;}
+	#ifdef HTTS_LANG_EX
+	}else{
+		if (!(lingp && t2u_ex)) {numerror=1;goto error;}
+	}
+	#endif
+#else
 	if (!(lingp && t2u)) {numerror=1;goto error;}
+#endif
 
-	if (!hdic)  goto error;
-
+#ifdef USE_TOKENIZER
+	#ifdef HTTS_LANG_EX
+	if(strcmp(lang,"ex")){
+	#endif
+		if (!hdic)  goto error;
+	#ifdef HTTS_LANG_EX
+	}else{
+		if (!tfil)  {numerror=2;goto error;}
+	}
+	#endif
+#else
+	if (!tfil)  {numerror=2;goto error;}
+#endif
 
 	ok=FALSE;
+
+
+
+
 #ifdef HTTS_METHOD_HTS //INAKI
 	if (!strcmp(smethod,"HTS")) {
 		ok=TRUE;
@@ -248,29 +402,105 @@ BOOL HTTSDo::create( VOID * db )
 	else
 		hts =FALSE;
 #endif
+
+
+#ifdef HTTS_METHOD_TACO
+	if (!strcmp(smethod,"Taco")) {
+		ok=TRUE;
+		utt = new UttPh;
+		u2w = new TACO_U2W;
+		if (!(utt&&u2w))  {numerror=32;goto error;}
+		taco=TRUE;
+	}
+	else
+		taco =FALSE;
+#endif
+#ifdef HTTS_METHOD_VITS
+	if (!strcmp(smethod,"Vits")) {
+		ok=TRUE;
+		utt = new UttPh;
+		u2w = new VITS_U2W;
+		if (!(utt&&u2w))  {numerror=33;goto error;}
+		vits=TRUE;
+	}
+	else
+		vits =FALSE;
+#endif
 	if (!ok) htts_error("Invalid synthesis method (%s)",(const CHAR*)smethod);
 
-	hdic->create(hdicdbname);
+#ifdef USE_TOKENIZER
+	#ifdef HTTS_LANG_EX
+	if(strcmp(lang,"ex")){
+	#endif
+		hdic->create(hdicdbname);
+	#ifdef HTTS_LANG_EX	
+	}else{
+		if (!tfil->create()) goto error;
+	}
+	#endif
+#else
+	//if (!tfil->set("SustFile",sustfn))  {numerror=9;goto error;}//linea cambiada
+	if (!tfil->create()) goto error;
+#endif
+	if (!modelpth.empty()) {
+		if(strcmp(lang,"ex")){
+			if (!lingp->set("PthModel",modelpth))  {numerror=10;goto error;}
+		}
+	}
 
+
+#ifdef USE_TOKENIZER
 	//$$$ Richie added. Muru Changed HDicDBName -> HDicDB
-	lingp->set("HDicDB",hdicdbname);
-
+	#ifdef HTTS_LANG_EX
+	if(strcmp(lang,"ex")){
+	#endif
+		lingp->set("HDicDB",hdicdbname);
+	#ifdef HTTS_LANG_EX
+	}
+	#endif
+#endif
 	if (!lingp->create())  {numerror=15;goto error;}
 	if (!utt->create())  {numerror=16;goto error;}
-	((UttWS*)utt)->setHDicDB(hdic);
-	if (!t2u->create((UttWS*)utt,hdic))  {numerror=17;goto error;}
+#ifdef USE_TOKENIZER
+	#ifdef HTTS_LANG_EX
+	if(strcmp(lang,"ex")){
+	#endif
+		((UttWS*)utt)->setHDicDB(hdic);
+		if (!t2u->create((UttWS*)utt,hdic))  {numerror=17;goto error;}
+	#ifdef HTTS_LANG_EX
+	}else{		
+		if (!t2u_ex->create((UttWS*)utt))  {numerror=18;goto error;}
+	}
+	#endif
+#else
+	if (!t2u->create((UttWS*)utt))  {numerror=18;goto error;}
+#endif
 
 #ifdef HTTS_METHOD_HTS
 	if (!strcmp(smethod,"HTS")) if (! ((HTS_U2W*)u2w)->create(lingp->get("Lang")))  {numerror=32;goto error;} //INAKI
 #endif
-
+#ifdef HTTS_METHOD_TACO
+	if (!strcmp(smethod,"Taco")) if (! ((TACO_U2W*)u2w)->create(lang))  {numerror=32;goto error;}
+#endif
+#ifdef HTTS_METHOD_VITS
+	if (!strcmp(smethod,"Vits")) if (! ((VITS_U2W*)u2w)->create(lang))  {numerror=33;goto error;}		
+#endif
 /* Configurar pitch nominal si es posible, si no, pitch 100Hz */
-	/*npth=get("NominalPth");
+	npth=get("NominalPth");
 	d=npth?atof(npth):0;
-	if (!set("PthMean",d?npth:"100"))  {numerror=28;goto error;}*/
-
+	if (!strcmp(lang,"es")||!strcmp(lang,"eu")) {
+		if (!set("PthMean",d?npth:"100"))  {numerror=28;goto error;}
+	}
 	/* cableamos un par de opciones... */
-	lingp->set("PhMap_jw2iu","n");
+#ifdef HTTS_METHOD_TACO
+	if (!strcmp(smethod,"Taco")) lingp->set("PhMap_jw2iu","n");
+	else lingp->set("PhMap_jw2iu","y");
+#elif defined(HTTS_METHOD_VITS)
+	if (!strcmp(smethod,"Vits")) lingp->set("PhMap_jw2iu","n");
+	else lingp->set("PhMap_jw2iu","y");
+#else
+	lingp->set("PhMap_jw2iu","y");
+#endif
 	lingp->set("Lang",lang);
 
 
@@ -313,6 +543,8 @@ error:
 	case 29: htts_error("Error 29. Can't create HTTS module"); //INAKI
 	case 30: htts_error("Error 30. Can't create HTTS module"); //INAKI
 	case 31: htts_error("Error 31. Can't create HTTS module"); //INAKI
+	case 32: htts_error("Error 32. Can't create HTTS module");
+	case 33: htts_error("Error 33. Can't create HTTS module");
 	}
 
 	//ts_error("Can't create HTTS module");
@@ -341,12 +573,13 @@ VOID *HTTSDo::getDB(VOID)
 BOOL HTTSDo::advance( VOID )
 {
 	BOOL flush;
-	Utt* u;
+	Utt* u=NULL;
 	const DOUBLE* vec;
 	INT len;
 	BOOL ret;
 
 	vec = u2w->output(&len,&flush);
+	
 	if (vec||flush) return TRUE;  // si u2w genera salida valida, OK
 
 /*... si no hay mas tramas de formantes o si es el sinte de
@@ -354,19 +587,54 @@ difonemas, intentamos obtener una nueva utt de t2u, y sintetizarla.
 pero primero, borramos la lista vieja del primer modulo (t2u)*/
 
 	if (ackpending) {  // solo si hace falta
+		#ifdef USE_TOKENIZER
+			#ifdef HTTS_LANG_EX
+			if(!strcmp(lang,"ex")){
+				t2u_ex->outack();
+			}else{
+			#endif
+				t2u->outack();
+			#ifdef HTTS_LANG_EX
+			}
+			#endif
+		#else
 		t2u->outack();
+		#endif
 		ackpending= FALSE;
 	}
-
+	
 	/* manejamos el buffer de flushes {flushbuf}. Lo necesitamos porque
 	los flushes no llegan a t2u mientras se esta procesando una frase,
 	ya que el ack() a este modulo se envia cuando se termina
 	con la frase en los demas modulos, y no tras el tu2->output() */
 	while (flushbuf>0) {
-		if (t2u->flush()) flushbuf--; else break;
+		#ifdef USE_TOKENIZER
+			#ifdef HTTS_LANG_EX
+			if(!strcmp(lang,"ex")){
+				if (t2u_ex->flush()) flushbuf--; else break;
+			}else{
+			#endif
+				if (t2u->flush()) flushbuf--; else break;
+			#ifdef HTTS_LANG_EX
+			}
+			#endif
+		#else
+			if (t2u->flush()) flushbuf--; else break;
+		#endif
 	}
-
-	u = t2u->output(&flush);
+	#ifdef USE_TOKENIZER
+		#ifdef HTTS_LANG_EX
+		if(!strcmp(lang,"ex")){
+			u = t2u_ex->output(&flush);
+		}else{
+		#endif
+			u = t2u->output(&flush);	
+		#ifdef HTTS_LANG_EX	
+		}
+		#endif
+	#else
+		u = t2u->output(&flush);	
+	#endif
 	if (u) {  // estupendo, obtuvimos una utt
 		lingp->utt_lingp(u);  // la procesamos
 #ifdef HTTS_METHOD_HTS
@@ -375,7 +643,25 @@ pero primero, borramos la lista vieja del primer modulo (t2u)*/
 			}
 			else{
 #endif
+#ifdef HTTS_METHOD_TACO
+			if(taco){
+				ret=u2w->input(u);
+			}
+			else{
+#endif
+#ifdef HTTS_METHOD_VITS
+			if(vits){
+				ret=u2w->input(u);
+			}
+			else{
+#endif
 
+#ifdef HTTS_METHOD_VITS
+				}
+#endif
+#ifdef HTTS_METHOD_TACO
+				}
+#endif
 #ifdef HTTS_METHOD_HTS
 		}
 #endif
@@ -391,6 +677,40 @@ pero primero, borramos la lista vieja del primer modulo (t2u)*/
 		return TRUE;
 	}
 
+#ifdef USE_TOKENIZER
+	// usando tokenizer no hay mas modulos delante de t2u
+	#ifdef HTTS_LANG_EX	
+	if(!strcmp(lang,"ex")){
+		const CHAR *s=tfil->output(&flush);
+		if (s) {
+			INT x=t2u_ex->input(s);
+			assert(strlen(s)==x);
+			tfil->outack(x);
+			return x;
+		}
+		if (flush) {  // nos ha dado un flush, ok
+			tfil->outack(t2u_ex->flush()?1:0);
+			return TRUE;
+		}
+	}
+	#endif
+#else
+	// si hemos llegado aqui, a ver si tfil nos da algo
+	const CHAR *s=tfil->output(&flush);
+	if (s) {
+
+		tfil->outack(t2u->input(s));
+		INT x=t2u->input(s);
+		tfil->outack(x);
+		return x;
+	}
+	if (flush) {  // nos ha dado un flush, ok
+
+		tfil->outack(t2u->flush()?1:0);
+		return TRUE;
+	}
+#endif
+	
 	(void)ret;
 	// si llegamos aqui, no hemos avanzado nada, :(
 	return FALSE;
@@ -401,8 +721,24 @@ pero primero, borramos la lista vieja del primer modulo (t2u)*/
 INT HTTSDo::input( const CHAR * str )
 {
 	assert(created);
-	assert(t2u);
-	INT ret=t2u->input(str);
+#ifdef USE_TOKENIZER
+	INT ret=0;
+	#ifdef HTTS_LANG_EX	
+	if(strcmp(lang,"ex")){
+	#endif
+		assert(t2u);
+		ret=t2u->input(str);
+	#ifdef HTTS_LANG_EX	
+	}else{
+		assert(tfil);
+		ret=tfil->input(str);
+	}
+	#endif
+#else
+	assert(tfil);	
+	INT ret=tfil->input(str);
+	//printf("RET %d \n",ret);
+#endif
 	advance();
 	return ret;
 }
@@ -412,8 +748,24 @@ INT HTTSDo::input( const CHAR * str )
 BOOL HTTSDo::input( CHAR ch )
 {
 	assert(created);
-	assert(t2u);
-	BOOL ret=t2u->input(ch);
+
+#ifdef USE_TOKENIZER
+	BOOL ret=0;
+	#ifdef HTTS_LANG_EX	
+	if(strcmp(lang,"ex")){
+	#endif
+		assert(t2u);
+		ret=t2u->input(ch);
+	#ifdef HTTS_LANG_EX	
+	}else{
+		assert(tfil);
+		ret=tfil->input(ch);
+	}
+	#endif
+#else
+	assert(tfil);
+	BOOL ret=tfil->input(ch);
+#endif
 	advance();
 	return ret;
 }
@@ -527,7 +879,16 @@ BOOL HTTSDo::set( const CHAR* param, const CHAR* val )
 #endif
 		return TRUE;
 	}
-
+	#ifdef HTTS_LANG_EX	
+		if (!strcmp(param,"Langext")) {
+			if (created) return FALSE;
+			langext= val;
+	#ifdef DEBUG_SHELL
+			htts_warn("HTTSDo::set - Languagext value captured [%s]", langext.chars());
+	#endif
+			return TRUE;
+		}
+	#endif
 	if (!strcmp(param,"Method")) {
 		if (created) return FALSE;
 		smethod= val;
@@ -604,31 +965,90 @@ BOOL HTTSDo::set( const CHAR* param, const CHAR* val )
 		return TRUE;
 	}
 #endif
+#ifdef USE_TOKENIZER	
+	#ifdef HTTS_LANG_EX	
 
-	if (!strcmp(param,"HDicDBName")) {
+	
+		if (!strcmp(param,"HDicDB")) {
+			if (created) return FALSE;
+			hdicdbname= val;
+			 //mirar esto
+			#ifdef DEBUG_SHELL
+				htts_warn("HTTSDo::set - HDicDB value captured [%s]", hdicdbname.chars());
+			#endif
+			return TRUE;
+		}
+	
+
+	
+		if (!strcmp(param,"LangVariant")) {
+			if (created) return FALSE;
+			langvariante= val;
+			 //mirar esto
+			#ifdef DEBUG_SHELL
+				htts_warn("HTTSDo::set - LangVariant value captured [%s]", langvariante.chars());
+			#endif
+			return TRUE;
+		}
+	
+
+	#endif
+#else
+	if (!strcmp(param,"SustFile")) {
 		if (created) return FALSE;
-		hdicdbname= val;
+		sustfn= val;
 #ifdef DEBUG_SHELL
-		htts_warn("HTTSDo::set - HDicDBName value captured [%s]", hdicdbname.chars());
+		htts_warn("HTTSDo::set - SustFile value captured [%s]", sustfn.chars());
 #endif
 		return TRUE;
 	}
+#endif
 
 	if (!strcmp(param,"DefEmo")) { //INAKI
 		if (!created) return FALSE;
-		t2u->set(param, val);
-		return TRUE;
+#ifdef USE_TOKENIZER
+		#ifdef HTTS_LANG_EX	
+		if(strcmp(lang,"ex")){
+		#endif
+			t2u->set(param, val);
+			return TRUE;
+		#ifdef HTTS_LANG_EX	
+		}
+		#endif
+#endif
 	}	//INAKI
 
 	if (!strcmp(param,"DefIntEmo")) { //INAKI
 		if (!created) return FALSE;
-		t2u->set(param, val);
-		return TRUE;
+#ifdef USE_TOKENIZER
+		#ifdef HTTS_LANG_EX	
+		if(!strcmp(lang,"ex")){
+			t2u_ex->set(param, val);
+			return TRUE;
+		}
+		#endif
+#endif
 	}	//INAKI
 
 	BOOL ret=FALSE;
 
-	if (t2u) ret = ret || t2u->set(param,val);  // $$$ casca
+#ifdef USE_TOKENIZER
+// Por ahora hdic no tiene set/get
+//	if (hdic) ret = ret || hdic->set(param,val);
+	#ifdef HTTS_LANG_EX	
+	if(!strcmp(lang,"ex")){
+		if (tfil) ret = ret || tfil->set(param,val);
+		if (t2u_ex) ret = ret || t2u_ex->set(param,val);
+	}else{
+	#endif	
+		if (t2u) ret = ret || t2u->set(param,val);
+	#ifdef HTTS_LANG_EX	
+	}
+	#endif	
+#else
+	if (tfil) ret = ret || tfil->set(param,val);
+#endif
+	//if (t2u) ret = ret || t2u->set(param,val);  // $$$ casca
 
 	if (lingp) ret = ret || lingp->set(param,val);
 
@@ -645,6 +1065,12 @@ const CHAR* HTTSDo::get( const CHAR* param )
 #ifdef HTTS_METHOD_HTS
 		"[HTS]"    //INAKI
 #endif
+#ifdef HTTS_METHOD_TACO
+		"[Taco]"
+#endif
+#ifdef HTTS_METHOD_VITS
+		"[Vits]"
+#endif
 	;
 
 	if (!strcmp(param,"QueryLanguages")) return
@@ -653,6 +1079,12 @@ const CHAR* HTTSDo::get( const CHAR* param )
 #endif
 #ifdef HTTS_LANG_EU
 		"[eu]"
+#endif
+#ifdef HTTS_LANG_CAT
+		"[ca]"
+#endif
+#ifdef HTTS_LANG_GAL
+		"[gl]"
 #endif
 	;
 
@@ -665,13 +1097,41 @@ const CHAR* HTTSDo::get( const CHAR* param )
 	if (!strcmp(param,"PowModel")) return lingp?lingp->get(param):(const CHAR *)modelpow;
 	if (!strcmp(param,"DurModel")) return lingp?lingp->get(param):(const CHAR *)modeldur;
 	if (!strcmp(param,"PauModel")) return lingp?lingp->get(param):(const CHAR *)modelpau;
-	if (!strcmp(param,"HDicDBName")) return hdicdbname;
+
+#ifdef USE_TOKENIZER
+	#ifdef HTTS_LANG_EX
+	if(strcmp(lang,"ex")){
+	#endif
+		if (!strcmp(param,"HDicDB")) return hdicdbname;
+	#ifdef HTTS_LANG_EX
+	}
+	#endif
+#else
+	if (!strcmp(param,"SustFile")) return sustfn;
+#endif
 
 	const CHAR *ret = NULL;
+
 #ifdef HTTS_METHOD_HTS //INAKI
 	if(hts){
 		if(!strcmp(param,"SRate")){
 			ret=strdup("16000");
+			return ret; //INAKI CHAPUZA
+		}
+	}
+#endif
+#ifdef HTTS_METHOD_TACO
+	if(taco){
+		if(!strcmp(param,"SRate")){
+			ret=strdup("22050");
+			return ret;
+		}
+	}
+#endif
+#ifdef HTTS_METHOD_VITS
+	if(vits){
+		if(!strcmp(param,"SRate")){
+			ret=strdup("22050");
 			return ret;
 		}
 	}
@@ -679,60 +1139,187 @@ const CHAR* HTTSDo::get( const CHAR* param )
 
 	if (u2w) ret = u2w->get(param); if (ret) return ret;
 	if (lingp) ret = lingp->get(param); if (ret) return ret;
+#ifdef USE_TOKENIZER
+	#ifdef HTTS_LANG_EX
+	if(!strcmp(lang,"ex")){
+		if (t2u_ex) ret = t2u_ex->get(param); if (ret) return ret;
+	}else{
+	#endif
+		if (t2u) ret = t2u->get(param); if (ret) return ret;
+	#ifdef HTTS_LANG_EX
+	}
+	#endif	
+#else
 	if (t2u) ret = t2u->get(param); if (ret) return ret;
+#endif
+#ifdef USE_TOKENIZER
 // Por ahora hdic no tiene get
 //	if (hdic) ret = hdic->get(param); if (ret) return ret;
+	#ifdef HTTS_LANG_EX
+	if(!strcmp(lang,"ex")){
+		if (tfil) ret = tfil->get(param); if (ret) return ret;
+	}
+	#endif
+#else
+	if (tfil) ret = tfil->get(param); if (ret) return ret;
+#endif
 	return ret;
 }
 
 /**********************************************************/
 /**********************************************************/
 //inaki
+//inaki
 //devuelve número de muestras sintetizadas y las almacena en short **samples
-int HTTSDo::synthesize_do_next_sentence( const CHAR *lang, short **samples){
-	String labels_string="";
-	int num_muestras=0;
-	Utt* u=NULL;
-	BOOL flush=FALSE;
+int HTTSDo::synthesize_do_next_sentence( const CHAR *lang, short **samples) {
+    int num_muestras = 0;
+    Utt *u = NULL;
+    BOOL flush = FALSE;
+#ifdef HTTS_LANG_EX
+    if (!strcmp(lang, "ex")) {
+        u = t2u_ex->output(&flush);
+    } else {
+#endif
 	u = t2u->output(&flush);
+#ifdef  HTTS_LANG_EX
+    }
+#endif
 	if (u) {  // estupendo, obtuvimos una utt
 		ackpending = TRUE;
 		lingp->utt_lingp(u);  // la procesamos
 
 
-		//String labels_string_tmp;
-		((HTS_U2W*)u2w)->pho2hts((UttPh*)u, labels_string, TRUE);	//convertimos a labels
-		//labels_string+=labels_string_tmp;
-		t2u->outack();
-		//	u = t2u->output(&flush);
-		*samples=((HTS_U2W*)u2w)->xinput_labels(labels_string, &num_muestras);
+		#ifdef HTTS_METHOD_HTS
+        String labels_string="";
+        if (!strcmp(smethod,"HTS")) {
+            //String labels_string_tmp;
+            ((HTS_U2W *) u2w)->pho2hts((UttPh *) u, labels_string, TRUE);    //convertimos a labels
+            //labels_string+=labels_string_tmp;
+            t2u->outack();
+            //ackpending = FALSE; //Ibon
+            //	u = t2u->output(&flush);
+            *samples = ((HTS_U2W *) u2w)->xinput_labels(labels_string, &num_muestras);
+        }
+		#endif
+		#ifdef HTTS_METHOD_TACO
+        if (!strcmp(smethod,"Taco")) {
+            *samples = ((TACO_U2W *) u2w)->xinput_labels((UttPh *) u, &num_muestras);
+			t2u->outack();
+        }
 
+        #endif
+        #ifdef HTTS_METHOD_VITS
+		if (!strcmp(smethod,"Vits")) {
+			*samples = ((VITS_U2W *) u2w)->xinput_labels((UttPh *) u, &num_muestras);
+#ifdef HTTS_LANG_EX
+            if (!strcmp(lang, "ex")) {
+                t2u_ex->outack();
+            } else {
+#endif
+			t2u->outack();
+#ifdef  HTTS_LANG_EX
+            }
+#endif
+//            t2u->outack();
+		}
+        #endif
 
 	}
+	else
+    if (flush) {
+#ifdef HTTS_LANG_EX
+        if (!strcmp(lang, "ex")) {
+            t2u_ex->outack();           //ISC pongo esto porque parece que se queda pendient de outack cuando genera una salida en vacio, no estoy seguro de porque no es necesario en eus y spa
+        }
+#endif
+        return -1;  // v2.4.0 Devolvemos -1 si ha habido flush para indicar fin de la síntesis, pero tras haber enviado las muestras
+    }
+
 	return num_muestras;
 	//*out=strdup(Silabificado);
-	
+
 }
+
+
+
+/*	return num_muestras;
+	//*out=strdup(Silabificado);
+	
+}*/
 /**********************************************************/
 /**********************************************************/
 //inaki
 BOOL HTTSDo::synthesize_do_input( const CHAR *str, const CHAR *lang , BOOL InputIsFile /*=FALSE*/, const CHAR *data_path){
 
+	BOOL flush=FALSE;
 	assert(created);
 	strcpy(DataPath, data_path);
 	//para euskera y castellano usamos código ahoTTS
 	
+
+
+//ISC nik egiten dut JonVarenean ez baitago funtzio hau
+//    assert(t2u);
+//		INT ret=t2u->input(str);
+    #ifdef USE_TOKENIZER
+        #ifdef HTTS_LANG_EX
+        if(strcmp(lang,"ex")){
+        #endif
 		assert(t2u);
-		INT ret=t2u->input(str);
+            INT ret=t2u->input(str);
+        #ifdef HTTS_LANG_EX
+        }
+		if(!strcmp(lang,"ex")){
+			assert(tfil);
+            BOOL closed=FALSE;
+            INT numacceptchar=0;
+            INT ret=0;
+			while (!closed) {
+                str+=numacceptchar;
+                numacceptchar += tfil->input(str);
+                if (numacceptchar>= strlen(str)) closed = TRUE;
+
+                const CHAR *s = tfil->output(&flush);
+                if (s) {
+                    ret = t2u_ex->input(s);
+
+                    assert(strlen(s) == ret);
+                    tfil->outack(ret);
+                } else if (flush) {
+                    if (t2u_ex->flush()) {
+                        flushbuf--;
+                        tfil->outack(1);
+                    } else
+                        tfil->outack(0);
+                }
+            }
+		}
+        #endif
+    #endif
 		flushbuf++;
-		BOOL flush=FALSE;
+		flush=FALSE;
 
 
 		String Silabificado="";
 		UttI pa, pi;
-	  if (ackpending) {  // solo si hace falta
+	    if (ackpending) {  // solo si hace falta
+	  		#ifdef USE_TOKENIZER
+			#ifdef HTTS_LANG_EX
+			if(strcmp(lang,"ex")){
+			#endif
 			t2u->outack();
 			ackpending= FALSE;
+			#ifdef HTTS_LANG_EX
+			}else{
+				t2u_ex->outack();
+				ackpending= FALSE;
+
+			}
+			#endif
+			#else
+			t2u->outack();
+			ackpending= FALSE;
+			#endif
 		}
 
 		/* manejamos el buffer de flushes {flushbuf}. Lo necesitamos porque
@@ -740,11 +1327,23 @@ BOOL HTTSDo::synthesize_do_input( const CHAR *str, const CHAR *lang , BOOL Input
 		ya que el ack() a este modulo se envia cuando se termina
 		con la frase en los demas modulos, y no tras el tu2->output() */
 		while (flushbuf>0) {
+			#ifdef USE_TOKENIZER
+				#ifdef HTTS_LANG_EX
+				if(strcmp(lang,"ex")){
+				#endif
 			if (t2u->flush()) flushbuf--; else break;
+				#ifdef HTTS_LANG_EX
+				}else{
+					if (t2u_ex->flush()) flushbuf--; else break;
+				}
+				#endif
+			#else
+				if (t2u->flush()) flushbuf--; else break;
+			#endif
 		}
 
 		return TRUE;
-	
+
 
 	
 }

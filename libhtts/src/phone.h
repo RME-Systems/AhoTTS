@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 #ifndef __PHONE_H__
 #define __PHONE_H__
 
@@ -70,6 +18,7 @@ Codificacion................. Borja Etxebarria
 
 Version  dd/mm/aa  Autor     Proposito de la edicion
 -------  --------  --------  -----------------------
+1.1.1    04/11/13  inaki     Añadir fonemas Iparralde
 1.1.0    20/10/08  iñaki     Añadir fonemas Inglés
 1.0.0    31/01/00  borja     codefreeze aHoTTS v1.0
 0.0.0    24/11/97  borja     Codificacion inicial.
@@ -166,8 +115,8 @@ typedef INT Phone;
 #define PH_aU 'W'
 #define PH_3_ '3'
 #define PH_O_ '0'
-#define PH_Q_ '4'   
-#define PH_dZ_ '2' 
+#define PH_Q_ '4'
+#define PH_dZ_ '2'
 #define PH_u_ '1'
 
 /*unilex BLIZZARD2008*/
@@ -177,10 +126,20 @@ typedef INT Phone;
 #define PH_lx '9'
 #define PH_mx '}'
 
+//Iparralde
+#define PH_y 'F' //iparralde
+#define PH_aa_ 'ç'
+#define PH_e_ '<'
+#define PH_o_  '('
+#define PH_2  ')'
+#define PH_R '['
+#define PH_Jb '='
+
+
 /* * * * * * * */
 
 /**********************************************************/
-/* estos realmente no son sampa, pero han hecho falta para 
+/* estos realmente no son sampa, pero han hecho falta para
 el euskera */
 
 #define PH_X  'X'    /* para la z  */
@@ -190,7 +149,7 @@ el euskera */
 
 /* La u afrancesada del dialecto iparralde que se marca con ü
  * Solo quedaba libre la letra 'F' (sampa y)*/
-#define PH_y 'F' //iparralde
+
 
 /**********************************************************/
 

@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -94,13 +42,13 @@ se usa la de libg++, si no, una version portada de la misma.
 
 ////////////////////////////////////////////////////////////
 /*
-    - Se ha quitado el soporte de regex
+    - Se ha quitado el soporte de regex  
     - Se han eliminado los includes a <std.h>, <new.h> y <builtin.h>
 		- Se ha modificado la gestion de errores de String::error
 		- Castings para quitar warnings (en BC++ 3.1)
 */
 
-/*
+/* 
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)
 
@@ -117,7 +65,7 @@ License along with this library; if not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
+/* 
   String class implementation
  */
 
@@ -143,7 +91,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 //}
 
 String::operator const char*() const
-{
+{ 
   return (const char*)chars();
 }
 
@@ -177,7 +125,7 @@ inline static void ncopy(const char* from, char* to, int n)
 // copy n bytes, null-terminate
 inline static void ncopy0(const char* from, char* to, int n)
 {
-  if (from != to)
+  if (from != to) 
   {
     while (--n >= 0) *to++ = *from++;
     *to = 0;
@@ -239,7 +187,7 @@ inline static StrRep* Snew(int newsiz)
 		abort();
 	}
 //  	 (*lib_error_handler)("String", "Requested length out of range");
-
+    
   StrRep* rep = (StrRep *) new char[allocsiz];
   rep->sz = allocsiz - sizeof(StrRep);
   return rep;
@@ -313,7 +261,7 @@ StrRep* Scopy(StrRep* old, const StrRep* s)
 {
   if (old == &_nilStrRep) old = 0;
   if (s == &_nilStrRep) s = 0;
-  if (old == s)
+  if (old == s) 
     return (old == 0)? &_nilStrRep : old;
   else if (s == 0)
   {
@@ -321,7 +269,7 @@ StrRep* Scopy(StrRep* old, const StrRep* s)
     old->len = 0;
     return old;
   }
-  else
+  else 
   {
     StrRep* rep;
     int newlen = s->len;
@@ -348,7 +296,7 @@ StrRep* Scat(StrRep* old, const char* s, int srclen, const char* t, int tlen)
   int newlen = srclen + tlen;
   StrRep* rep;
 
-  if (old == 0 || newlen > old->sz ||
+  if (old == 0 || newlen > old->sz || 
       (t >= old->s && t < &(old->s[old->len]))) // beware of aliasing
     rep = Snew(newlen);
   else
@@ -375,7 +323,7 @@ StrRep* Scat(StrRep* old, const char* s, int srclen, const char* t, int tlen,
   if (ulen < 0) ulen = slen(u);
   int newlen = srclen + tlen + ulen;
   StrRep* rep;
-  if (old == 0 || newlen > old->sz ||
+  if (old == 0 || newlen > old->sz || 
       (t >= old->s && t < &(old->s[old->len])) ||
       (u >= old->s && u < &(old->s[old->len])))
     rep = Snew(newlen);
@@ -410,7 +358,7 @@ StrRep* Sprepend(StrRep* old, const char* t, int tlen)
   if (tlen < 0) tlen = slen(t);
   int newlen = srclen + tlen;
   StrRep* rep;
-  if (old == 0 || newlen > old->sz ||
+  if (old == 0 || newlen > old->sz || 
       (t >= old->s && t < &(old->s[old->len])))
     rep = Snew(newlen);
   else
@@ -475,7 +423,7 @@ int fcompare(const String& x, const String& y)
   return al - bl;
 }
 
-// these are not inline, but pull in the above inlines, so are
+// these are not inline, but pull in the above inlines, so are 
 // pretty fast
 
 int compare(const String& x, const char* b)
@@ -564,7 +512,7 @@ int String::search(int start, int sl, const char* t, int tl) const
     {
       const char* firsts = &(s[tl - 1]);
       const char* lastt =  &(t[tl - 1]);
-      const char* p = &(s[sl + start + 1]);
+      const char* p = &(s[sl + start + 1]); 
 
       while (--p >= firsts)
       {
@@ -647,7 +595,7 @@ int String::_gsub(const char* pat, int pl, const char* r, int rl)
   int sl = length();
   if (sl <= 0 || pl <= 0 || sl < pl)
     return nmatches;
-
+  
   const char* s = chars();
 
   // prepare to make new rep
@@ -961,7 +909,7 @@ String join(String src[], int n, const String& separator) RETURNS(x)
   x.rep = Sresize (x.rep, xlen);
 
   int j = 0;
-
+  
   for (i = 0; i < n - 1; ++i)
   {
     ncopy(src[i].chars(), &(x.rep->s[j]), src[i].length());
@@ -972,12 +920,12 @@ String join(String src[], int n, const String& separator) RETURNS(x)
   ncopy0(src[i].chars(), &(x.rep->s[j]), src[i].length());
   RETURN(x);
 }
-
+  
 /*
  misc
 */
 
-
+    
 StrRep* Sreverse(const StrRep* src, StrRep* dest)
 {
   int n = src->len;
@@ -1030,7 +978,7 @@ StrRep* Scapitalize(const StrRep* src, StrRep* dest)
     int at_word;
 		if ((at_word = islower(*p))!=0)
       *p = toupper(*p);
-    else
+    else 
       at_word = isupper(*p) || isdigit(*p);
 
     if (at_word)
@@ -1141,7 +1089,7 @@ String common_prefix(const String& x, const String& y, int startpos)
   return r;
 }
 
-String common_suffix(const String& x, const String& y, int startpos)
+String common_suffix(const String& x, const String& y, int startpos) 
 {
   String r;
   const char* xchars = x.chars();
@@ -1214,7 +1162,7 @@ int readline(istream& s, String& x, char terminator, int discard)
 
 
 ostream& operator<<(ostream& s, const SubString& x)
-{
+{ 
   const char* a = x.chars();
   const char* lasta = &(a[x.length()]);
   while (a < lasta)
@@ -1227,7 +1175,7 @@ ostream& operator<<(ostream& s, const SubString& x)
 int String::freq(const SubString& y) const
 {
   int found = 0;
-  for (unsigned int i = 0; i < length(); i++)
+  for (unsigned int i = 0; i < length(); i++) 
     if (match(i,length(),0,y.chars(), y.length())>= 0) found++;
   return(found);
 }
@@ -1235,7 +1183,7 @@ int String::freq(const SubString& y) const
 int String::freq(const String& y) const
 {
   int found = 0;
-  for (unsigned int i = 0; i < length(); i++)
+  for (unsigned int i = 0; i < length(); i++) 
     if (match(i,length(),0,y.chars(),y.length()) >= 0) found++;
   return(found);
 }
@@ -1243,7 +1191,7 @@ int String::freq(const String& y) const
 int String::freq(const char* t) const
 {
   int found = 0;
-  for (unsigned int i = 0; i < length(); i++)
+  for (unsigned int i = 0; i < length(); i++) 
     if (match(i,length(),0,t) >= 0) found++;
   return(found);
 }
@@ -1251,7 +1199,7 @@ int String::freq(const char* t) const
 int String::freq(char c) const
 {
   int found = 0;
-  for (unsigned int i = 0; i < length(); i++)
+  for (unsigned int i = 0; i < length(); i++) 
     if (match(i,length(),0,&c,1) >= 0) found++;
   return(found);
 }

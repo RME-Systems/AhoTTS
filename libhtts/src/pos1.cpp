@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -69,7 +17,7 @@ Version  dd/mm/aa    Autor     Comentario
 ---------  ------------  --------	  -------------
 2.0.2    03/10/07    Inaki	z_T transkripzio salbuespena
 2.0.1		02/03/02		Nora		Aurreko bertsioaren hobekuntzak.
-2.0.0		22/02/05		Nora		Hitzegiko hitz batean transkripzio fonetikoaren salbuespena baldin badago,
+2.0.0		22/02/05		Nora		Hitzegiko hitz batean transkripzio fonetikoaren salbuespena baldin badago, 
 											informazioa gelaxkan jartzeko.
 1.0.0    XX/xx/xx  Inma Sardon     Codificacion inicial
 ======================== Contenido ========================
@@ -96,7 +44,7 @@ VOID LangEU_Categ::posdic(UttWS &u, UttI p) {
 #ifdef DEBUGPOS
 	htts_warn("  Pos1: POSDIC word_act: %s",u.cell(p).getWord());
 #endif
-
+		
 	switch (u.getHDicDB()->query(u.cell(p).getHDicRef(),HDIC_QUERY_EU_TALDE1)) {
 		case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
 			u.cell(p).addPOS(POS_EU_ADI_JOK);
@@ -184,7 +132,7 @@ Arazoa ez dago funtzioetan, baizik eta ezaugarri berriaren ezarpenean
 		case 1:
 			u.cell(p).addPOS(POS_EU_STR_MRK);
 	}
-
+	
 	switch (u.getHDicDB()->query(u.cell(p).getHDicRef(),HDIC_QUERY_EU_TF_MRK)) {
 		case 1:
 			u.cell(p).addPOS(POS_EU_TF_MRK);
@@ -201,7 +149,7 @@ Arazoa ez dago funtzioetan, baizik eta ezaugarri berriaren ezarpenean
 			switch (u.getHDicDB()->query(u.cell(p).getHDicRef(),HDIC_QUERY_EU_PAU_AUR)) {
 				case 1:
 					u.cell(p).addPOS(POS_EU_PAUSE_AURRE);
-			}
+			} 
 */
 
 	switch (u.getHDicDB()->query(u.cell(p).getHDicRef(),HDIC_QUERY_EU_PAU_ATZE)) {
@@ -276,7 +224,7 @@ VOID LangEU_Categ::babait(UttWS &u,UttI p, char *word_act,LangEU_HDicDB &db)
 		strncpy(atz1,adi,2);	//copia 2 letras
 		atz1[2]='\0';
 	}
-
+	
 	if (len_adi>=3) {
 		strncpy(atz2,adi,3);	//copia 3 letras
 		atz2[3]='\0';
@@ -585,7 +533,7 @@ i=len_adi;
 			tam=db.query(hDicRef,HDIC_QUERY_MATCHLEN);
 			switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 				case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-					if (tam==0)
+					if (tam==0) 
 							encontrado = TRUE;
 #ifdef DEBUGPOS
 					htts_warn("  Pos1: ADIT Lo de delante de tea es un verbo principal. [%s]", adi_temp);
@@ -608,7 +556,7 @@ i=len_adi;
 						strcpy(adi_ref,u.getHDicDB()->hDicRefToTxt(hDicRef));
 						switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 							case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-								if (tam==0)
+								if (tam==0) 
 									encontrado = TRUE;
 #ifdef DEBUGPOS
 					htts_warn("  Pos1: ADIT Lo de delante de tea-tzea es un verbo principal acabado en n. [%s]", adi_temp);
@@ -626,7 +574,7 @@ i=len_adi;
 						strcpy(adi_ref,u.getHDicDB()->hDicRefToTxt(hDicRef));
 						switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 							case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-								if (tam==0)
+								if (tam==0) 
 									encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea-tzea+tu es un verbo principal tipo orraztu (con z antes de t). [%s]", adi_temp);
@@ -645,7 +593,7 @@ i=len_adi;
 
 						switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 							case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-								if (tam==0)
+								if (tam==0) 
 										encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea+i es un verbo principal tipo adierazi. [%s]", adi_temp);
@@ -665,7 +613,7 @@ i=len_adi;
 						strcpy(adi_ref,u.getHDicDB()->hDicRefToTxt(hDicRef));
 						switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 							case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-									if (tam==0)
+									if (tam==0) 
 										encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea es un verbo principal tipo jantzi. [%s]", adi_temp);
@@ -685,7 +633,7 @@ i=len_adi;
 
 						switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 							case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-								if (tam==0)
+								if (tam==0) 
 									encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea-tzea+i es un verbo principal tipo erosi. [%s]", adi_temp);
@@ -705,7 +653,7 @@ i=len_adi;
 						strcpy(adi_ref,u.getHDicDB()->hDicRefToTxt(hDicRef));
 						switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 							case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-									if (tam==0)
+									if (tam==0) 
 										encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea es un verbo principal tipo erantsi. [%s]", adi_temp);
@@ -725,7 +673,7 @@ i=len_adi;
 							tam=db.query(hDicRef,HDIC_QUERY_MATCHLEN);
 							switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 								case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-									if (tam==0)
+									if (tam==0) 
 										encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea+tu es un verbo principal tipo aberastu. [%s]", adi_temp);
@@ -747,7 +695,7 @@ i=len_adi;
 						strcpy(adi_ref,u.getHDicDB()->hDicRefToTxt(hDicRef));
 						switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 							case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-									if (tam==0)
+									if (tam==0) 
 										encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea-tzea es un verbo principal tipo itxi. [%s]", adi_temp);
@@ -769,7 +717,7 @@ i=len_adi;
 								tam=db.query(hDicRef,HDIC_QUERY_MATCHLEN);
 								switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 									case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-										if (tam==0)
+										if (tam==0) 
 											encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea+tu es un verbo principal tipo inexistente. [%s]", adi_temp);
@@ -791,7 +739,7 @@ i=len_adi;
 								tam=db.query(hDicRef,HDIC_QUERY_MATCHLEN);
 								switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 									case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-										if (tam==0)
+										if (tam==0) 
 											encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tea+du es un verbo principal tipo inexistente. [%s]", adi_temp);
@@ -818,7 +766,7 @@ sera 0 y encontrado TRUE */
 				strcpy(adi_ref,u.getHDicDB()->hDicRefToTxt(hDicRef));
 				switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 					case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-						if (tam==0)
+						if (tam==0) 
 							encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tzea es un verbo principal. [%s]", adi_temp);
@@ -838,7 +786,7 @@ sera 0 y encontrado TRUE */
 							strcpy(adi_ref,u.getHDicDB()->hDicRefToTxt(hDicRef));
 							switch(db.query(hDicRef,HDIC_QUERY_EU_TALDE1)){
 								case HDIC_ANSWER_EU_TALDE1_ADI_JOK:
-									if (tam==0)
+									if (tam==0) 
 										encontrado = TRUE;
 #ifdef DEBUGPOS
           htts_warn("  Pos1: ADIT Lo de delante de tzea+i es un verbo principal tipo erori. [%s]", adi_temp);
@@ -903,7 +851,7 @@ sera 0 y encontrado TRUE */
 								break;
 
 							}
-
+							
 						break;
 					 default:
 							if (len_adi>=4) {

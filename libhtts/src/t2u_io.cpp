@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -154,6 +102,7 @@ BOOL T2ULst::create( UttWS *ut )
 
 INT T2ULst::input(const CHAR * str)
 {
+
 	assert(utt);
 
 	if (!str)
@@ -164,7 +113,7 @@ INT T2ULst::input(const CHAR * str)
 	// flushing pendiente o propagacion de flushing==> no acepta entrada
 	if (flushing)
 		return 0;
-
+//fprintf(stderr,"T2ULst::input: %s\n",str);
 	return entrada_cadena(str);		// acepta texto
 }
 
@@ -219,18 +168,18 @@ BOOL T2ULst::flush(VOID)
    - {mode} (I)  modo de funcionamiento en caso de no haber
 	 salida disponible (valores T2U_CB_???? )
    - {cb_n} (I)  es un parametro que se pasa al callback y que el
-   usuario puede usar para lo que le convenga.
+   usuario puede usar para lo que le convenga. 
    Retorno:
    Se {devuelve} una referencia a la utterance de salida (que podremos
-   copiar, o transpasar (===borrar)). Se {devuelve} NULL si no hay lista
+   copiar, o transpasar (===borrar)). Se {devuelve} NULL si no hay lista 
    completa, o si es un flush.
    En {flush} se devuelve si es o no un flush.
    Cuando hay una salida valida (tanto lista con contenido como flush)
    el usuario debe despues llamar a la funcion outack()
    para indicar que ha aceptado la lista o el flush.
-   Mientras no se llame a outack(), no se aceptan entradas,
+   Mientras no se llame a outack(), no se aceptan entradas, 
    y output() devolvera continuamente lo mismo (cuidado, que
-   si el usuario ya a borrado la lista, obtendra una lista
+   si el usuario ya a borrado la lista, obtendra una lista 
    vacia).
    En el momento en que se llame a outack() la lista interna
    se vacia (si es que el usuario no la ha transferido ya a
@@ -241,16 +190,20 @@ Utt *T2ULst::output(BOOL * flush, INT mode, VOID *cb_n)
 	assert(utt);
 
 	if (espera_outack) {
+
 		*flush = ((uttcompleta == FALSE) && (flushing > 0));
 		return (*flush) ? (UttWS*)NULL : utt;
 	}
 	*flush = 0;
 	while (1) {
+
 		if (uttcompleta) {  //si tiene una frase completa pasala
+
 			espera_outack = TRUE;
 			return utt;
 		}
 		if (flushing) {	 //si hay un flushing mandalo
+
 			espera_outack = TRUE;
 			*flush = 1;
 			return NULL;
@@ -259,11 +212,13 @@ Utt *T2ULst::output(BOOL * flush, INT mode, VOID *cb_n)
 
 		// si hay que llamar al call-back
 		if (mode != T2U_CB_NOCALL) {
+
 			callback(cb_n);
 			if (mode == T2U_CB_CALL1)
 				mode = T2U_CB_NOCALL;
 		}
 		else
+
 			break;  // salir del while
 	}
 

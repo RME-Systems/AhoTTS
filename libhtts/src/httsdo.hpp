@@ -17,9 +17,9 @@ http://aholab.ehu.es/ahocoder/
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
+	1997-2012  Aholab Signal Processing Laboratory, University of the Basque
 	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
+    *2011-2012 Aholab Signal Processing Laboratory, University of the Basque
 	  Country (UPV/EHU)
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -70,7 +70,11 @@ Codificacion................. Borja Etxebarria
 
 Version  dd/mm/aa  Autor     Proposito de la edicion
 -------  --------  --------  -----------------------
-1.0.3	 02/10/11  Inaki     add synthesize API
+7.0.0    22/7/2025 ISC       ExtLangLing
+4.0.0    19/12/25  ISC	     Version with multilingual functions for public and non-linux platforms
+3.0.1	 22/06/24  Jon       Añadir Idioma externo	
+3.0.0    09/02/23  Inigo     Integrate Tacotron model
+1.0.3	 02/10/11  Inaki     add transcription API
 1.0.1	 15/12/10  Inaki     Añadir Metodo HTS
 1.0.1	 03/10/07  Inaki     Añadir Metodo Corpus
 1.0.0    31/01/00  borja     codefreeze aHoTTS v1.0
@@ -108,17 +112,31 @@ Version  dd/mm/aa  Autor     Proposito de la edicion
 #ifdef HTTS_METHOD_HTS
 #include "hts.hpp"
 #endif
-
-
+#ifdef HTTS_METHOD_TACO
+#include "taco.hpp"
+#endif
+#ifdef HTTS_METHOD_VITS
+#include "vits.hpp"
+#endif
+/**********************************************************/
 
 
 #ifdef USE_TOKENIZER
 #include "t2l.hpp"
 #include "hdic.hpp"
+	#ifdef HTTS_LANG_EX
+		#include "tfil.hpp"
+		#include "t2u.hpp"
+	#endif
 #else
 #include "t2u.hpp"
 #include "tfil.hpp"
 #endif
+#ifdef HTTS_LANG_EX
+#include "wrapper.hpp"
+#endif
+/**********************************************************/
+
 
 
 class HTTSDo {
@@ -129,11 +147,18 @@ private:
 	TextToList *t2u;
 	HDicDB * hdic;
 	String hdicdbname;
+	#ifdef HTTS_LANG_EX
+		TxtFilt * tfil;
+		T2ULst * t2u_ex;
+	#endif
 #else
 	T2ULst * t2u;
 	TxtFilt * tfil;
 	String sustfn;
 #endif
+	#ifdef HTTS_LANG_EX
+ 		wrapper * miWrapper;
+	#endif
 	LingP * lingp;
 	Utt2Wav * u2w;
 	Utt * utt;
@@ -155,11 +180,17 @@ private:
 	BOOL hts;
 	char DataPath[1024];
 #endif
-#ifdef HTTS_LANG_GL
-	LingCotovia *ling_cotovia;
+#ifdef HTTS_METHOD_TACO
+	BOOL taco;
 #endif
-
+#ifdef HTTS_METHOD_VITS
+	BOOL vits;
+#endif
 	String lang;
+	#ifdef HTTS_LANG_EX
+		String langext;
+		String langvariante;		
+	#endif
 	String emo;
 	String emoint;
 	String smethod;
@@ -171,7 +202,7 @@ private:
 
 	BOOL ackpending;
 
-	BOOL advance( VOID );
+	INT advance( VOID );
 	VOID destroy( VOID );
 
 public:
@@ -194,15 +225,10 @@ public:
 #ifdef HTTS_LANG_FEST
 	int str2num(const char * cadena);
 	char *num2str(int num);
-	//Variables necesarias
-	EST_TokenStream ts;
-	LISP eou_tree;
-	LISP stream;
 	//friend LISP tts_chunk_stream_aho(EST_TokenStream &ts,
-	//	      LISP eou_tree,
+	//	      LISP eou_tree,    
 	//	      LISP utt, String &label_string, Utt2Wav * u2w);
 #endif
-
 	/*************/
 #ifdef HTTS_INTERFACE_WAVEMARKS
 	const Mark1DList & mrkget( VOID );
@@ -220,7 +246,7 @@ public:
 
 	BOOL set( const CHAR* param, const CHAR* val );
 	const CHAR* get( const CHAR* param );
-
+	
 
 };
 

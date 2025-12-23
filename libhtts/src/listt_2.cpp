@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -66,7 +14,6 @@ Codificacion................. Borja Etxebarria
 
 Version  dd/mm/aa  Autor     Comentario
 -------  --------  --------  ----------
-1.1.1    2012  	   Inaki     corregir warnings deprecated
 1.1.0    07/05/99  Borja     modif ??_mv()
 1.0.1    30/08/98  Borja     split varios modulos listt_?.cpp
 
@@ -275,35 +222,35 @@ VOID _KVPList::__exchange_p( _PListNode *n1, _PListNode *n2 )
 
 Lix _KVPList::_insbefore_d_kv(LIINT i, const VOID* key, const VOID* val)
 {
-	return _insbefore_d_kv(LIX_SAFE(i,(char *)"_insbefore_d_kv",TRUE),key,val);
+	return _insbefore_d_kv(LIX_SAFE(i,"_insbefore_d_kv",TRUE),key,val);
 }
 
 /**********************************************************/
 
 Lix _KVPList::_insbefore_p_kv(LIINT i, VOID* key, VOID* val)
 {
-	return _insbefore_p_kv(LIX_SAFE(i,(char *)"_insbefore_p_kv",TRUE),key,val);
+	return _insbefore_p_kv(LIX_SAFE(i,"_insbefore_p_kv",TRUE),key,val);
 }
 
 /**********************************************************/
 
 Lix _KVPList::_insafter_d_kv(LIINT i, const VOID* key, const VOID* val)
 {
-	return _insafter_d_kv(LIX_SAFE(i,(char *)"_insafter_d_kv",TRUE),key,val);
+	return _insafter_d_kv(LIX_SAFE(i,"_insafter_d_kv",TRUE),key,val);
 }
 
 /**********************************************************/
 
 Lix _KVPList::_insafter_p_kv(LIINT i, VOID* key, VOID* val)
 {
-	return _insafter_p_kv(LIX_SAFE(i,(char *)"_insafter_p_kv",TRUE),key,val);
+	return _insafter_p_kv(LIX_SAFE(i,"_insafter_p_kv",TRUE),key,val);
 }
 
 /**********************************************************/
 
 const VOID* _KVPList::_itemval(LIINT i) const
 {
-	return ((_KVPListNode*)LIX_SAFE(i,(char *)"_itemval",FALSE))->vp;
+	return ((_KVPListNode*)LIX_SAFE(i,"_itemval",FALSE))->vp;
 }
 
 /**********************************************************/

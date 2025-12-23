@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -508,4 +456,70 @@ BOOL LangEU_PhTrans :: trans_fonet_hitza (UttPh &u,UttI wordp)
 	if(u.cell(wordp).queryPOS(POS_EU_TF_MRK))
 		hizt_tf_mrk =TRUE;
 	return(hizt_tf_mrk);
+}
+
+
+//Agustin: saber si una sílaba tiene la estructura (C)V(W)C ó CVW
+BOOL LangEU_PhTrans :: es_astuna(UttPh &u, UttI syl)
+{
+	BOOL astuna=FALSE;
+	BOOL vocal=FALSE;
+	BOOL consonante=FALSE;
+	/*
+	UttI i,i_prev,i_pprev;
+	Phone p,p_prev,p_pprev;
+	
+	//Cambiar esto, ir hacia adelante en lugar de hacia atras 
+	i = u.phoneLast(syl,URANGE_SYLLABLE);
+	p = u.cell(i).getPhone();//ultimo fonema
+	i_prev = u.phonePrev(i);
+	p_prev = u.cell(i_prev).getPhone();//penultimo
+	i_pprev = u.phonePrev(i_prev);
+	p_pprev = u.cell(i_pprev).getPhone();//antepenultimo
+	
+	if(!LangEU_PhUti::phIsVowel(p)){ //(C)V(W)C
+		if( LangEU_PhUti::phIsVowel(p_prev) || ((p_prev == PHEU_a) || (p_prev == PHEU_e) || (p_prev == PHEU_o) || (p_prev == PHEU_u) || (p_prev == PHEU_i)
+		&& ((p_pprev == PHEU_iaprox)|| (p_pprev == PHEU_uaprox))) ){
+		astuna = TRUE;}
+		//CVW
+	}else if((!LangEU_PhUti::phIsVowel(p_pprev)) && ((p_prev == PHEU_a) || (p_prev == PHEU_e) || (p_prev == PHEU_o) || (p_prev == PHEU_u) || (p_prev == PHEU_i)) //CVW
+		&& ((p == PHEU_iaprox)|| (p == PHEU_uaprox))){
+			astuna = TRUE;
+	}*/
+	UttI i;
+	Phone p;
+	
+	//fprintf(stderr,"\tBuscando astuna: ");
+	i=u.phoneFirst(syl,URANGE_SYLLABLE); //Comprobar que phoneFirst existe
+	p=u.cell(i).getPhone(); //primer fonema
+	
+	//Comprobar que devuelve isvowel, supongo que devuelve true, si no hay que negarlo
+	//bucle todas los fonemas
+	for (i=u.phoneFirst(syl,URANGE_SYLLABLE);i!=0; i=u.phoneNext(i,URANGE_SYLLABLE)){
+		p=u.cell(i).getPhone();
+		if(LangEU_PhUti::phIsVowel(p) && vocal==FALSE){
+			vocal=TRUE;
+		}else if(!LangEU_PhUti::phIsVowel(p) && vocal==TRUE){
+			astuna=TRUE;//fprintf(stderr,"Encontrado astuna por (c)v(w)c\n");
+			break;//sabemos que es astuna, podemos salir del bucle
+		}
+	}
+	vocal=FALSE;
+	//Si con la anterior no se ha encontrado astuna igual ahora si
+	if(astuna==FALSE){
+		for (i=u.phoneFirst(syl,URANGE_SYLLABLE);i!=0; i=u.phoneNext(i,URANGE_SYLLABLE)){
+			p=u.cell(i).getPhone();
+			if(!LangEU_PhUti::phIsVowel(p) && consonante==FALSE){
+				consonante=TRUE;
+			}else if((p==PHEU_a || p==PHEU_e || p==PHEU_i || p==PHEU_o || p==PHEU_u) && consonante==TRUE){
+				vocal=TRUE;
+			}else if ((p==PHEU_iaprox || p==PHEU_uaprox) && consonante==TRUE && vocal==TRUE){
+				astuna=TRUE;//fprintf(stderr,"Encontrado astuna por cvw\n");
+			}
+		}
+	}
+	
+	//if (astuna!=TRUE) fprintf(stderr,"Silaba no astuna\n");
+	return astuna;
+	
 }

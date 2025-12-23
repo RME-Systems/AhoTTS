@@ -1,58 +1,7 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
+Copyright: 1997 - CSTR University of Edinburg
 
 Nombre fuente................ UTI_END.C
 Nombre paquete............... UTI.H
@@ -76,126 +25,114 @@ Big endian / little endian conversion
 
 #include "uti.h"
 
-VOID reverseendian( VOID *buff, int elemsize, int count )
-
-{
-
-      int k;
-
-      BYTE *aux1, *aux2, *aux3, temp;
-
-      for (aux3=(BYTE *)buff, k=0; k<count; k++) {
-
-            aux1 = aux3;
-
-            aux3 += elemsize;
-
-            aux2 = aux3-1;
-
-            while (aux2 > aux1) {
-
-                  temp = *aux1;
-
-                  *aux1 = *aux2;
-
-                  *aux2 = temp;
-
-                  aux1++;
-
-                  aux2--;
-
-            }
-
-      }
-
-}
-
- 
-
- 
-
 /**********************************************************/
-
- 
 
 VOID endian_swap16( VOID * word16 )
-
 {
-
-      reverseendian(word16,2,1);
-
+#define P ((BYTE*)word16)
+   BYTE tmp;
+   tmp =P[0];
+   P[0]=P[1];
+   P[1]=tmp;
+#undef P
 }
 
- 
-
 /**********************************************************/
-
- 
 
 VOID endian_swap32( VOID * word32 )
-
 {
-
-      reverseendian(word32,4,1);
-
+#define P ((BYTE*)word32)
+   BYTE tmp;
+   tmp =P[0];
+   P[0]=P[3];
+   P[3]=tmp;
+   tmp =P[1];
+   P[1]=P[2];
+   P[2]=tmp;
+#undef P
 }
 
- 
-
 /**********************************************************/
-
- 
 
 VOID endian_swap64( VOID * word64 )
-
 {
-
-      reverseendian(word64,8,1);
-
+#define P ((BYTE*)word64)
+   BYTE tmp;
+   tmp =P[0];
+   P[0]=P[7];
+   P[7]=tmp;
+   tmp =P[1];
+   P[1]=P[6];
+   P[6]=tmp;
+   tmp =P[2];
+   P[2]=P[5];
+   P[5]=tmp;
+	 tmp =P[3];
+   P[3]=P[4];
+   P[4]=tmp;
+#undef P
 }
 
- 
-
 /**********************************************************/
-
- 
 
 VOID endian_swap16_n( VOID * word16, int n )
-
 {
+	 BYTE tmp;
+	 BYTE *p=(BYTE*)word16;
 
-      reverseendian(word16,2,n);
-
+	 while (n) {
+			n--;
+			tmp =p[0];
+			p[0]=p[1];
+			p[1]=tmp;
+			p+=2;
+	 }
 }
 
- 
-
 /**********************************************************/
-
- 
 
 VOID endian_swap32_n( VOID * word32, int n )
-
 {
+	 BYTE tmp;
+	 BYTE *p=(BYTE*)word32;
 
-      reverseendian(word32,4,n);
-
+	 while (n) {
+			n--;
+			tmp =p[0];
+			p[0]=p[3];
+			p[3]=tmp;
+			tmp =p[1];
+			p[1]=p[2];
+			p[2]=tmp;
+			p+=4;
+	 }
 }
 
- 
-
 /**********************************************************/
-
- 
 
 VOID endian_swap64_n( VOID * word64, int n )
-
 {
+	 BYTE tmp;
+	 BYTE *p=(BYTE*)word64;
 
-      reverseendian(word64,8,n);
-
+	 while (n) {
+			n--;
+			tmp =p[0];
+			p[0]=p[7];
+			p[7]=tmp;
+			tmp =p[1];
+			p[1]=p[6];
+			p[6]=tmp;
+			tmp =p[2];
+			p[2]=p[5];
+			p[5]=tmp;
+			tmp =p[3];
+			p[3]=p[4];
+			p[4]=tmp;
+			p+=8;
+   }
 }
 
- 
-
 /**********************************************************/
+
+

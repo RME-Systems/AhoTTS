@@ -427,15 +427,50 @@ static HTS_Boolean HTS_Window_load(HTS_Window * win, HTS_File ** fp, int size)
    int fsize, length;
    char buff[HTS_MAXBUFLEN];
    HTS_Boolean result = TRUE;
-
+#ifdef DEFWINS
+   /* check */
+   if (win == NULL)
+      return FALSE;
+   // derro: if no input file, 3 windows are assumed
+   if (fp == NULL)
+      size = 3;
+#else
    /* check */
    if (win == NULL || fp == NULL || size <= 0)
       return FALSE;
-
+#endif
    win->size = size;
    win->l_width = (int *) HTS_calloc(win->size, sizeof(int));
    win->r_width = (int *) HTS_calloc(win->size, sizeof(int));
    win->coefficient = (double **) HTS_calloc(win->size, sizeof(double *));
+#ifdef DEFWINS
+   // derro: default windows
+   if (fp == NULL) {
+      fsize = 3;
+	  length = 1;
+      // static: [1]
+	  win->coefficient[0] = (double *) HTS_calloc(1, sizeof(double));
+      win->coefficient[0][0] = 1.0;
+	  win->l_width[1] = 0;
+	  win->r_width[1] = 0;
+      // 1st derivative: [-0.5 0.0 0.5]
+      win->coefficient[1] = (double *) HTS_calloc(fsize, sizeof(double));
+      win->coefficient[1][0] = -0.5;
+	  win->coefficient[1][1] = 0.0;
+	  win->coefficient[1][2] = 0.5;
+      win->coefficient[1] += length;
+	  win->l_width[1] = -length;
+	  win->r_width[1] = length;
+      // 2nd derivative [1.0 -2.0 1.0]
+      win->coefficient[2] = (double *) HTS_calloc(fsize, sizeof(double));
+      win->coefficient[2][0] = 1.0;
+	  win->coefficient[2][1] = -2.0;
+	  win->coefficient[2][2] = 1.0;
+      win->coefficient[2] += length;
+	  win->l_width[2] = -length;
+	  win->r_width[2] = length;
+   } else
+#endif
    /* set delta coefficents */
    for (i = 0; i < win->size; i++) {
       if (HTS_get_token(fp[i], buff) == FALSE) {
@@ -903,11 +938,13 @@ HTS_Boolean HTS_ModelSet_load_parameter(HTS_ModelSet * ms, HTS_File ** pdf_fp, H
       HTS_ModelSet_clear(ms);
       return FALSE;
    }
+#ifndef DEFWINS
    if (win_fp == NULL) {
       HTS_error(1, "HTS_ModelSet_load_parameter: File for wins is not specified.\n");
       HTS_ModelSet_clear(ms);
       return FALSE;
    }
+#endif
    /* initialize */
    if (!ms->stream) {
       ms->stream = (HTS_Stream *) HTS_calloc(ms->nstream, sizeof(HTS_Stream));

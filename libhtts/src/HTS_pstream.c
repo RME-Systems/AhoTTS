@@ -444,6 +444,13 @@ double HTS_PStreamSet_get_parameter(HTS_PStreamSet * pss, int stream_index, int 
    return pss->pstream[stream_index].par[frame_index][vector_index];
 }
 
+/* HTS_PStreamSet_set_parameter: set parameter */
+//Iñaki
+void HTS_PStreamSet_set_parameter(HTS_PStreamSet * pss, int stream_index, int frame_index, int vector_index, double value)
+{
+   pss->pstream[stream_index].par[frame_index][vector_index] = value;
+}
+
 /* HTS_PStreamSet_get_parameter_vector: get parameter vector*/
 double *HTS_PStreamSet_get_parameter_vector(HTS_PStreamSet * pss, int stream_index, int frame_index)
 {

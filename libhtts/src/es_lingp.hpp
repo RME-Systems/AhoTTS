@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 #ifndef __ES_LINGP_HPP__
 #define __ES_LINGP_HPP__
 
@@ -184,6 +132,9 @@ public:
 	#endif
 
 private:
+#ifdef HTTS_ES_PAU1
+	VOID utt_pau1( UttWS &ut );
+#endif
 #ifdef HTTS_ES_PAU2
 	VOID utt_pau2( UttWS &ut );
 //	VOID *pau2_dummy_ptr;
@@ -209,6 +160,15 @@ public:
 	VOID setPhTKatamotz( BOOL katamotz ) { phtkatamotz=katamotz; }
 	BOOL getPhTKatamotz( VOID ) { return phtkatamotz; }
 	VOID utt_w2phtr(UttPh & ut);
+	#ifdef XML	
+	//------------------------------------------------------------------------------------
+	//INAKI, para hacer silabificacion no-coarticulada en modulo 1 segun esquema ECESS
+	VOID pause_syllab_stress(UttPh &u, UttI wordp){ 
+			 pausegr_ch2ph(u, wordp);
+			word_syllab( u, wordp );
+			word_stress( u, wordp );
+	}
+	#endif	
 	//----------------------------------------------------------------------------------
 	VOID setPhTSpeaker( const char *speaker ) { pht_speaker=speaker; }//INAKI:
 	const char *getPhTSpeaker( VOID ) { return pht_speaker; }//INAKI: speaker dependent transcriptions
@@ -254,15 +214,36 @@ private:
 #ifdef HTTS_PROSOD_ES_DUR2
 	VOID utt_dur2( UttPh &ut );
 #endif
+#ifdef HTTS_PROSOD_ES_DURMARTA
+	VOID utt_dur_marta( UttPh &ut );
+#endif
+#ifdef HTTS_PROSOD_ES_DURVIGO
+	VOID utt_dur_vigo( UttPh &ut );
+#endif
+#ifdef HTTS_PROSOD_ES_POW1
+	VOID utt_pow1( UttPh &ut );
+#endif
+#ifdef HTTS_PROSOD_ES_POW2
+	VOID utt_pow2( UttPh &ut );
+#endif
 #ifdef HTTS_PROSOD_ES_PTH1
 	VOID utt_pth1( UttPh &ut );
 //	VOID *pth1_dummy_ptr;
 	/* Busca "dummy" para ir viendo donde se puede ir metiendo codigo
 	especifico para un metodo prosodico. */
 #endif
-#ifdef HTTS_PROSOD_ES_POW1
-	VOID utt_pow1( UttPh &ut );
+#ifdef HTTS_PROSOD_ES_PTH2
+	VOID utt_pth2( UttPh &ut );
 #endif
+#ifdef HTTS_PROSOD_ES_PTH3
+        VOID utt_pth3( UttPh &ut );
+#endif
+#ifdef HTTS_PROSOD_ES_PTH3VIGO
+	VOID utt_pth3_vigo( UttPh &ut );//vigo
+#endif
+
+
+private:
 	VOID utt_emphasis( UttPh &u );
 
 protected:
@@ -308,7 +289,6 @@ public:
 	VOID utt_new_val(Utt *u);//Aritz
 	VOID utt_n_val_pause(Utt *u);//Aritz
 	#endif
-
 	BOOL set( const CHAR *param, const CHAR *val );
 	const CHAR *get( const CHAR *param );
 };

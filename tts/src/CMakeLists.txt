@@ -1,4 +1,5 @@
 project(tts_multilingual)
+include_directories (../../libhtts/include)
 include_directories (.)
 IF(MSVC)
     ADD_DEFINITIONS(/D _CRT_SECURE_NO_WARNINGS)

@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 #ifndef __STRING_HPP__
 #define __STRING_HPP__
 
@@ -93,10 +41,10 @@ se usa la de libg++, si no, una version portada de la misma.
 // This may look like C code, but it is really -*- C++ -*-
 /*
   Cambiado por Deltatel Ingenieria Telematica SL el 10/9/96:
-    - Se ha quitado el soporte de regex
+    - Se ha quitado el soporte de regex  
 */
 
-/*
+/* 
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)
 
@@ -124,9 +72,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 struct StrRep                     // internal String representations
 {
-  unsigned short    len;         // string length
+  unsigned short    len;         // string length 
   unsigned short    sz;          // allocated space
-  char              s[1];        // the string starts here
+  char              s[1];        // the string starts here 
                                  // (at least 1 char for trailing null)
                                  // allocated & expanded via non-public fcts
 };
@@ -182,7 +130,7 @@ public:
 
 // return 1 if target matches entire SubString
 
-// IO
+// IO 
 
   friend ostream&   operator<<(ostream& s, const SubString& x);
 
@@ -192,7 +140,7 @@ public:
   int               empty() const;
   const char*       chars() const;
 
-  int               OK() const;
+  int               OK() const; 
 
 };
 
@@ -232,12 +180,12 @@ public:
 
 // concatenation
 
-  String&           operator += (const String&     y);
+  String&           operator += (const String&     y); 
   String&           operator += (const SubString&  y);
   String&           operator += (const char* t);
   String&           operator += (char        c);
 
-  void              prepend(const String&     y);
+  void              prepend(const String&     y); 
   void              prepend(const SubString&  y);
   void              prepend(const char* t);
   void              prepend(char        c);
@@ -261,7 +209,7 @@ public:
 	friend void     cat(const char*, const char*, String&);
   friend void     cat(const char*, char, String&);
 
-// double concatenation, by request. (yes, there are too many versions,
+// double concatenation, by request. (yes, there are too many versions, 
 // but if one is supported, then the others should be too...)
 // Concatenate first 3 args, store in last arg
 
@@ -296,10 +244,10 @@ public:
 
 // return position of target in string or -1 for failure
 
-  int               index(char        c, int startpos = 0) const;
-  int               index(const String&     y, int startpos = 0) const;
-  int               index(const SubString&  y, int startpos = 0) const;
-  int               index(const char* t, int startpos = 0) const;
+  int               index(char        c, int startpos = 0) const;      
+  int               index(const String&     y, int startpos = 0) const;      
+  int               index(const SubString&  y, int startpos = 0) const;      
+  int               index(const char* t, int startpos = 0) const;  
 
 // return 1 if target appears anyhere in String; else 0
 
@@ -308,7 +256,7 @@ public:
   int               contains(const SubString&  y) const;
   int               contains(const char* t) const;
 
-// return 1 if target appears anywhere after position pos
+// return 1 if target appears anywhere after position pos 
 // (or before, if pos is negative) in String; else 0
 
   int               contains(char        c, int pos) const;
@@ -325,7 +273,7 @@ public:
 
 //  return number of occurences of target in String
 
-  int               freq(char        c) const;
+  int               freq(char        c) const; 
   int               freq(const String&     y) const;
   int               freq(const SubString&  y) const;
   int               freq(const char* t) const;
@@ -339,8 +287,8 @@ public:
   SubString         at(int         pos, int len);
   SubString         operator () (int         pos, int len); // synonym for at
 
-  SubString         at(const String&     x, int startpos = 0);
-  SubString         at(const SubString&  x, int startpos = 0);
+  SubString         at(const String&     x, int startpos = 0); 
+  SubString         at(const SubString&  x, int startpos = 0); 
   SubString         at(const char* t, int startpos = 0);
   SubString         at(char        c, int startpos = 0);
 
@@ -392,12 +340,12 @@ public:
 
 // split string into array res at separators; return number of elements
 
-  friend int        split(const String& x, String res[], int maxn,
+  friend int        split(const String& x, String res[], int maxn, 
                           const String& sep);
 
-  friend String     common_prefix(const String& x, const String& y,
+  friend String     common_prefix(const String& x, const String& y, 
                                   int startpos = 0);
-  friend String     common_suffix(const String& x, const String& y,
+  friend String     common_suffix(const String& x, const String& y, 
                                   int startpos = -1);
   friend String     replicate(char        c, int n);
   friend String     replicate(const String&     y, int n);
@@ -437,7 +385,7 @@ public:
   friend ostream&   operator<<(ostream& s, const SubString& x);
   friend istream&   operator>>(istream& s, String& x);
 
-  friend int        readline(istream& s, String& x,
+  friend int        readline(istream& s, String& x, 
                              char terminator = '\n',
                              int discard_terminator = 1);
 
@@ -488,17 +436,17 @@ inline const char* SubString::chars() const { return &(S.rep->s[pos]); }
 
 // constructors
 
-inline String::String()
+inline String::String() 
   : rep(&_nilStrRep) {}
-inline String::String(const String& x)
+inline String::String(const String& x) 
   : rep(Scopy(0, x.rep)) {}
-inline String::String(const char* t)
+inline String::String(const char* t) 
   : rep(Salloc(0, t, -1, -1)) {}
 inline String::String(const char* t, int tlen)
   : rep(Salloc(0, t, tlen, tlen)) {}
 inline String::String(const SubString& y)
   : rep(Salloc(0, y.chars(), y.length(), y.length())) {}
-inline String::String(char c)
+inline String::String(char c) 
   : rep(Salloc(0, &c, 1, 1)) {}
 
 inline String::~String() { if (rep != &_nilStrRep) delete rep; }
@@ -513,7 +461,7 @@ inline SubString::~SubString() {}
 // assignment
 
 inline String& String::operator =  (const String& y)
-{
+{ 
   rep = Scopy(rep, y.rep);
   return *this;
 }
@@ -852,67 +800,67 @@ inline String operator + (const String& x, const String& y)
   String r;  cat(x, y, r);  return r;
 }
 
-inline String operator + (const String& x, const SubString& y)
+inline String operator + (const String& x, const SubString& y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const String& x, const char* y)
+inline String operator + (const String& x, const char* y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const String& x, char y)
+inline String operator + (const String& x, char y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const SubString& x, const String& y)
+inline String operator + (const SubString& x, const String& y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const SubString& x, const SubString& y)
+inline String operator + (const SubString& x, const SubString& y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const SubString& x, const char* y)
+inline String operator + (const SubString& x, const char* y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const SubString& x, char y)
+inline String operator + (const SubString& x, char y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const char* x, const String& y)
+inline String operator + (const char* x, const String& y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String operator + (const char* x, const SubString& y)
+inline String operator + (const char* x, const SubString& y) 
 {
   String r; cat(x, y, r); return r;
 }
 
-inline String reverse(const String& x)
+inline String reverse(const String& x) 
 {
   String r; r.rep = Sreverse(x.rep, r.rep); return r;
 }
 
-inline String upcase(const String& x)
+inline String upcase(const String& x) 
 {
   String r; r.rep = Supcase(x.rep, r.rep); return r;
 }
 
-inline String downcase(const String& x)
+inline String downcase(const String& x) 
 {
   String r; r.rep = Sdowncase(x.rep, r.rep); return r;
 }
 
-inline String capitalize(const String& x)
+inline String capitalize(const String& x) 
 {
   String r; r.rep = Scapitalize(x.rep, r.rep); return r;
 }
@@ -928,12 +876,12 @@ inline void String::prepend(const String& y)
 
 inline void String::prepend(const char* y)
 {
-  rep = Sprepend(rep, y, -1);
+  rep = Sprepend(rep, y, -1); 
 }
 
 inline void String::prepend(char y)
 {
-  rep = Sprepend(rep, &y, 1);
+  rep = Sprepend(rep, &y, 1); 
 }
 
 inline void String::prepend(const SubString& y)
@@ -969,31 +917,31 @@ inline void String::capitalize()
 
 // element extraction
 
-inline char&  String::operator [] (int i)
-{
+inline char&  String::operator [] (int i) 
+{ 
   if (((unsigned)i) >= length()) error("invalid index");
   return rep->s[i];
 }
 
 inline const char&  String::operator [] (int i) const
-{
+{ 
   if (((unsigned)i) >= length()) error("invalid index");
   return rep->s[i];
 }
 
 inline char  String::elem (int i) const
-{
+{ 
   if (((unsigned)i) >= length()) error("invalid index");
   return rep->s[i];
 }
 
 inline char  String::firstchar() const
-{
+{ 
   return elem(0);
 }
 
 inline char  String::lastchar() const
-{
+{ 
   return elem(length() - 1);
 }
 
@@ -1005,17 +953,17 @@ inline int String::index(char c, int startpos) const
 }
 
 inline int String::index(const char* t, int startpos) const
-{
+{   
   return search(startpos, length(), t);
 }
 
 inline int String::index(const String& y, int startpos) const
-{
+{   
   return search(startpos, length(), y.chars(), y.length());
 }
 
 inline int String::index(const SubString& y, int startpos) const
-{
+{   
   return search(startpos, length(), y.chars(), y.length());
 }
 
@@ -1025,17 +973,17 @@ inline int String::contains(char c) const
 }
 
 inline int String::contains(const char* t) const
-{
+{   
   return search(0, length(), t) >= 0;
 }
 
 inline int String::contains(const String& y) const
-{
+{   
   return search(0, length(), y.chars(), y.length()) >= 0;
 }
 
 inline int String::contains(const SubString& y) const
-{
+{   
   return search(0, length(), y.chars(), y.length()) >= 0;
 }
 
@@ -1080,17 +1028,17 @@ inline int String::matches(char c, int p) const
 }
 
 inline int SubString::contains(const char* t) const
-{
+{   
   return S.search(pos, pos+len, t) >= 0;
 }
 
 inline int SubString::contains(const String& y) const
-{
+{   
   return S.search(pos, pos+len, y.chars(), y.length()) >= 0;
 }
 
 inline int SubString::contains(const SubString&  y) const
-{
+{   
   return S.search(pos, pos+len, y.chars(), y.length()) >= 0;
 }
 
@@ -1128,99 +1076,99 @@ inline  ostream& operator<<(ostream& s, const String& x)
 
 // a zillion comparison operators
 
-inline int operator==(const String& x, const String& y)
+inline int operator==(const String& x, const String& y) 
 {
-  return compare(x, y) == 0;
+  return compare(x, y) == 0; 
 }
 
 inline int operator!=(const String& x, const String& y)
 {
-  return compare(x, y) != 0;
+  return compare(x, y) != 0; 
 }
 
 inline int operator>(const String& x, const String& y)
 {
-  return compare(x, y) > 0;
+  return compare(x, y) > 0; 
 }
 
 inline int operator>=(const String& x, const String& y)
 {
-  return compare(x, y) >= 0;
+  return compare(x, y) >= 0; 
 }
 
 inline int operator<(const String& x, const String& y)
 {
-  return compare(x, y) < 0;
+  return compare(x, y) < 0; 
 }
 
 inline int operator<=(const String& x, const String& y)
 {
-  return compare(x, y) <= 0;
+  return compare(x, y) <= 0; 
 }
 
-inline int operator==(const String& x, const SubString&  y)
+inline int operator==(const String& x, const SubString&  y) 
 {
-  return compare(x, y) == 0;
+  return compare(x, y) == 0; 
 }
 
 inline int operator!=(const String& x, const SubString&  y)
 {
-  return compare(x, y) != 0;
+  return compare(x, y) != 0; 
 }
 
-inline int operator>(const String& x, const SubString&  y)
+inline int operator>(const String& x, const SubString&  y)      
 {
-  return compare(x, y) > 0;
+  return compare(x, y) > 0; 
 }
 
 inline int operator>=(const String& x, const SubString&  y)
 {
-  return compare(x, y) >= 0;
+  return compare(x, y) >= 0; 
 }
 
-inline int operator<(const String& x, const SubString&  y)
+inline int operator<(const String& x, const SubString&  y) 
 {
-  return compare(x, y) < 0;
+  return compare(x, y) < 0; 
 }
 
 inline int operator<=(const String& x, const SubString&  y)
 {
-  return compare(x, y) <= 0;
+  return compare(x, y) <= 0; 
 }
 
-inline int operator==(const String& x, const char* t)
+inline int operator==(const String& x, const char* t) 
 {
-  return compare(x, t) == 0;
+  return compare(x, t) == 0; 
 }
 
-inline int operator!=(const String& x, const char* t)
+inline int operator!=(const String& x, const char* t) 
 {
-  return compare(x, t) != 0;
+  return compare(x, t) != 0; 
 }
 
-inline int operator>(const String& x, const char* t)
+inline int operator>(const String& x, const char* t)  
 {
-  return compare(x, t) > 0;
+  return compare(x, t) > 0; 
 }
 
-inline int operator>=(const String& x, const char* t)
+inline int operator>=(const String& x, const char* t) 
 {
-  return compare(x, t) >= 0;
+  return compare(x, t) >= 0; 
 }
 
-inline int operator<(const String& x, const char* t)
+inline int operator<(const String& x, const char* t)  
 {
-  return compare(x, t) < 0;
+  return compare(x, t) < 0; 
 }
 
-inline int operator<=(const String& x, const char* t)
+inline int operator<=(const String& x, const char* t) 
 {
-  return compare(x, t) <= 0;
+  return compare(x, t) <= 0; 
 }
 
-inline int operator==(const SubString& x, const String& y)
+inline int operator==(const SubString& x, const String& y) 
 {
-  return compare(y, x) == 0;
+  return compare(y, x) == 0; 
 }
 
 inline int operator!=(const SubString& x, const String& y)
@@ -1228,29 +1176,29 @@ inline int operator!=(const SubString& x, const String& y)
   return compare(y, x) != 0;
 }
 
-inline int operator>(const SubString& x, const String& y)
+inline int operator>(const SubString& x, const String& y)      
 {
   return compare(y, x) < 0;
 }
 
-inline int operator>=(const SubString& x, const String& y)
+inline int operator>=(const SubString& x, const String& y)     
 {
   return compare(y, x) <= 0;
 }
 
-inline int operator<(const SubString& x, const String& y)
+inline int operator<(const SubString& x, const String& y)      
 {
   return compare(y, x) > 0;
 }
 
-inline int operator<=(const SubString& x, const String& y)
+inline int operator<=(const SubString& x, const String& y)     
 {
   return compare(y, x) >= 0;
 }
 
-inline int operator==(const SubString& x, const SubString&  y)
+inline int operator==(const SubString& x, const SubString&  y) 
 {
-  return compare(x, y) == 0;
+  return compare(x, y) == 0; 
 }
 
 inline int operator!=(const SubString& x, const SubString&  y)
@@ -1258,7 +1206,7 @@ inline int operator!=(const SubString& x, const SubString&  y)
   return compare(x, y) != 0;
 }
 
-inline int operator>(const SubString& x, const SubString&  y)
+inline int operator>(const SubString& x, const SubString&  y)      
 {
   return compare(x, y) > 0;
 }
@@ -1268,7 +1216,7 @@ inline int operator>=(const SubString& x, const SubString&  y)
   return compare(x, y) >= 0;
 }
 
-inline int operator<(const SubString& x, const SubString&  y)
+inline int operator<(const SubString& x, const SubString&  y) 
 {
   return compare(x, y) < 0;
 }
@@ -1278,34 +1226,34 @@ inline int operator<=(const SubString& x, const SubString&  y)
   return compare(x, y) <= 0;
 }
 
-inline int operator==(const SubString& x, const char* t)
+inline int operator==(const SubString& x, const char* t) 
 {
-  return compare(x, t) == 0;
+  return compare(x, t) == 0; 
 }
 
-inline int operator!=(const SubString& x, const char* t)
+inline int operator!=(const SubString& x, const char* t) 
 {
   return compare(x, t) != 0;
 }
 
-inline int operator>(const SubString& x, const char* t)
+inline int operator>(const SubString& x, const char* t)  
 {
-  return compare(x, t) > 0;
+  return compare(x, t) > 0; 
 }
 
-inline int operator>=(const SubString& x, const char* t)
+inline int operator>=(const SubString& x, const char* t) 
 {
-  return compare(x, t) >= 0;
+  return compare(x, t) >= 0; 
 }
 
-inline int operator<(const SubString& x, const char* t)
+inline int operator<(const SubString& x, const char* t)  
 {
-  return compare(x, t) < 0;
+  return compare(x, t) < 0; 
 }
 
-inline int operator<=(const SubString& x, const char* t)
+inline int operator<=(const SubString& x, const char* t) 
 {
-  return compare(x, t) <= 0;
+  return compare(x, t) <= 0; 
 }
 
 
@@ -1315,7 +1263,7 @@ inline SubString String::_substr(int first, int l)
 {
   if (first < 0 || (unsigned)(first + l) > length() )
     return SubString(_nilString, 0, 0) ;
-  else
+  else 
     return SubString(*this, first, l);
 }
 

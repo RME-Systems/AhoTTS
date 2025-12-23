@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 #ifndef __EU_LINGP_HPP__
 #define __EU_LINGP_HPP__
 
@@ -70,12 +18,13 @@ Codificacion................. Borja Etxebarria
 
 Version  dd/mm/aa		 Autor     Proposito de la edicion
 --------------------------------------------------------------
+2.1.8    22/02/12           Agustin añadir opcion phtiparralde para usar dialecto de iparralde
 2.1.7	 13/12/11			Inaki	añadir opcion phtkatamotz para no pronunciar como rr las r al principio de una palabra
 2.1.6	 12/07/10			Inaki	Añadir celdas para modificar la prosodia desde el texto (proyecto Aritz) HTTS_PROSO_VAL
-2.1.5    05/01/10           Inaki	Añadir modelos de duracion y pitch para amaia (dur_amaia, pth3_amaia)
-2.1.4    20/03/09           Inaki	Añadir modelos de duracion para emociones karolina (dur_emo)
+2.1.5    05/01/10           Inaki	Añadir modelos de duracion y pitch para amaia (dur_amaia, pth3_amaia) 
+2.1.4    20/03/09           Inaki	Añadir modelos de duracion para emociones karolina (dur_emo) 
 2.1.3    20/10/08           Inaki	Añadir modelos de duracion para emociones (dur_sad y dur_happy)	(Eva)
-2.1.2    20/10/08           Inaki	Añadir soporte para transcripción en diccionario (Nora)
+2.1.2    20/10/08           Inaki	Añadir soporte para transcripción en diccionario (Nora)	
 2.1.1    03/10/07           Inaki	Define MODULO_1 y _2, ExternPOS, PhTSpeaker y z_T salbuespena
 2.1.0		16/03/05		Nora		Hitzen transkripzio fonetikoa hitzegian agertu ahal izateko (EZ EZARRITA)
 2.0.0		22/02/05		Nora		Transkripzio fonetikoaren salbuespen motak POS etiketen zerrendan gehitu.
@@ -143,6 +92,9 @@ correspondientes) */
 #define PHEU_O	PH_Q  //lo usamos para el gallego, es un parche
 #define PHEU_N	PH_N  //lo usamos para el gallego, es un parche
 #define PHEU_h	PH_h  //lo usamos para el gallego, es un parche
+//iparralde, "u" afrancesada y "h" no muda
+#define PHEU_y PH_y
+#define PHEU_h PH_h
 
 //otros que por ahora no usamos
 #define PHEU_baprox  PH_B
@@ -172,6 +124,9 @@ class LangEU_POS {
 		BOOL created;
 		LangEU_Categ categ;
 		LangEU_GF	grupof;
+		#ifdef IXA_POS_GF
+		BOOL EXTERN_POS_GF; //INAKI, para seleccionar entre nuestro pos o el de IXA (via SOAP)
+		#endif
 
 public:
 	LangEU_POS( VOID );
@@ -179,9 +134,22 @@ public:
 	BOOL create(VOID);
 
 	VOID utt_pos( UttWS & u );
+	#ifdef IXA_POS_GF	
+	#ifndef MODULE_2	
+	//--------------------------------------------------
+	//IÑAKI Kanpoko POS-a erabiltzeko funtzioa
+	VOID utt_extern_pos(UttWS &u);
+	#endif
+	#ifndef MODULE_1	
+	//--------------------------------------------------
+	//IÑAKI Kanpoko TaldeFuntzionala erabiltzeko funtzioa
+	VOID utt_extern_gf(UttWS &u);
+	#endif
+	#endif	
 
 	VOID utt_categ( UttWS & u );
 	VOID utt_gf( UttWS & u );
+
 	BOOL set( const CHAR *param, const CHAR *val );
 	const CHAR *get( const CHAR *param );
 };
@@ -210,6 +178,13 @@ private:
 #ifdef HTTS_EU_PAU1
 	VOID utt_pau1( UttWS &ut );
 #endif
+#ifdef HTTS_EU_PAU2
+	VOID utt_pau2( UttWS &ut );
+	VOID pause_insert(UttWS & ut,UttI p);
+//	VOID *pau2_dummy_ptr;
+	/* Busca "dummy" para ir viendo donde se puede ir metiendo codigo
+	especifico para un metodo pausador . */
+#endif
 
 protected:
 	DOUBLE pau_nsilab;
@@ -223,17 +198,33 @@ protected:
 
 class LangEU_PhTrans {
 private:
+	BOOL StressDicSingleWords ;	//Agustin: diccionario especial con acentuacion diferente
+	BOOL phtiparralde; 	//Agustin: dialecto de iparralde, cambia algo la transcripcion fonetica
 	BOOL phtsimple;
 	BOOL phtkatamotz; //INAKI: para no pronunciar como rr las r a principio de palabra
 	String pht_speaker;//INAKI: KAROLINAREN TRANSKRIPZIORAKO
 	String pht_hdic_name; //INAKI, para transcripcion desde diccionario
 public:
-	LangEU_PhTrans( VOID ) { phtsimple=0; phtkatamotz=0; }
+	LangEU_PhTrans( VOID ) { phtsimple=0; phtkatamotz=0; phtiparralde=0; StressDicSingleWords =0;}
 	VOID utt_w2phtr(UttPh &ut);
 	VOID setPhTSimple( BOOL simple ) { phtsimple=simple; }
 	VOID setPhTKatamotz( BOOL katamotz ) { phtkatamotz=katamotz; }
+	VOID setPhTIparralde (BOOL iparralde) { phtiparralde=iparralde; }
+	VOID setStressDicSingleWords  (BOOL stressdic) {  StressDicSingleWords=stressdic;}
 	BOOL getPhTSimple( VOID ) { return phtsimple; }
 	BOOL getPhTKatamotz( VOID ) { return phtkatamotz; }
+	BOOL getPhTIparralde ( VOID ) { return phtiparralde; }
+	BOOL getStressDicSingleWords  ( VOID ) { return  StressDicSingleWords ; }
+	#ifdef XML	
+	//------------------------------------------------------------------------------------
+	//INAKI, para hacer silabificacion no-coarticulada en modulo 1 segun esquema ECESS
+	VOID pause_syllab_stress(UttPh &u, UttI wordp){ 
+			 pausegr_ch2ph(u, wordp);
+			 word_syllab( u, wordp );
+			 word_stress( u, wordp );
+	}
+	//----------------------------------------------------------------------------------
+	#endif
 	VOID setPhTSpeaker( const char *speaker ) { pht_speaker=speaker; }//INAKI: KAROLINAREN TRANSKRIPZIORAKO
 	const char *getPhTSpeaker( VOID ) { return pht_speaker; }//INAKI: KAROLINAREN TRANSKRIPZIORAKO
 	VOID setPhTHDicName( const char *dic ) { pht_hdic_name=dic; }//INAKI: transcripcion desde diccionario
@@ -245,10 +236,10 @@ private:
 	VOID iu2jw( UttPh &u );
 	VOID utt_silph( UttPh &u );
 	VOID fgrp2agrp(UttPh &u,UttI fg);
- /***********Hitzaren transkripzio fonetikoa hiztegian agertzen bada  2005/03/16********************/
+ /***********Hitzaren transkripzio fonetikoa hiztegian agertzen bada  2005/03/16********************/ 
  	UttI     tf_mrk_ch2ph(UttPh &u, UttI senp );
-/***************************************************************************************/
-//	BOOL es_excepcion(UttPh &u,UttI p, char caso);
+/***************************************************************************************/    
+	BOOL es_excepcion(UttPh &u,UttI p, char caso);
 	BOOL es_bai_aditz(UttPh &u,UttI p);
 	VOID agrp_stress( UttPh &u, UttI agrp);
 	VOID syllable_stress( UttPh &u, UttI syl );
@@ -276,16 +267,18 @@ private:
 
 	BOOL set( const CHAR *param, const CHAR *val ); //INAKI: KAROLINAREN TRANSKRIPZIORAKO
 	const CHAR *get( const CHAR *param ); //INAKI: KAROLINAREN TRANSKRIPZIORAKO
-
-/*Transkripzio fonetikoaren salbuspena zein den jakiteko behar diren funtzioak 2005/02/22******************/
+	
+	BOOL es_astuna(UttPh &u, UttI syl); //Agustin: saber si una silaba es pesada para acentuarla segun StressDicSingleWords
+	
+/*Transkripzio fonetikoaren salbuspena zein den jakiteko behar diren funtzioak 2005/02/22******************/ 	
 //	BOOL trans_fonet_salb_none(UttPh &u,UttI wordp);    //TRUE=Hitz horrek ez du Transkripzio Fonetikoaren salbuespenik
 	BOOL trans_fonet_salb_i_0_j(UttPh &u,UttI wordp); 		//TRUE="i" grafiaren transkripzioa [0] izan ordez [j] da
 	BOOL trans_fonet_salb_j_0_x(UttPh &u,UttI wordp); 	//TRUE="j" grafiaren transkripzioa [0] izan ordez [x] da
 	BOOL trans_fonet_salb_l_L_l(UttPh &u,UttI wordp);		//TRUE="l" grafiaren transkripzioa [L] izan ordez [l] da
-	BOOL trans_fonet_salb_n_J_n(UttPh &u,UttI wordp);		//TRUE="n" grafiaren transkripzioa [J] izan ordez [n] da
-	BOOL trans_fonet_salb_z_0_t(UttPh &u,UttI wordp);	//INAKI: salbuespena z->T (ad. Zaragoza)	TRUE="z" grafiaren transkripzioa [S`] izan ordez [T] da
+	BOOL trans_fonet_salb_n_J_n(UttPh &u,UttI wordp);		//TRUE="n" grafiaren transkripzioa [J] izan ordez [n] da	
+	BOOL trans_fonet_salb_z_0_t(UttPh &u,UttI wordp);	//INAKI: salbuespena z->T (ad. Zaragoza)	TRUE="z" grafiaren transkripzioa [S`] izan ordez [T] da 
 /*******************************************************************************************/
-
+	
 /***********Hitzaren transkripzio fonetikoa hiztegian agertzen bada************************/
 	BOOL trans_fonet_hitza(UttPh &u,UttI wordp); //TRUE=TF hitzegian agertzen bada. Hitza markatua egon behar du.
 /********************************************************************************/
@@ -322,15 +315,43 @@ private:
 #ifdef HTTS_PROSOD_EU_DUR2
 	VOID utt_dur2( UttPh &ut );
 #endif
+#ifdef HTTS_PROSOD_EU_DURSAD
+	VOID utt_dur_sad(UttPh &ut);
+#endif
+#ifdef HTTS_PROSOD_EU_DURHAPPY
+	VOID utt_dur_happy(UttPh &ut);
+#endif
+#ifdef HTTS_PROSOD_EU_DUREMO
+	VOID utt_dur_emo(UttPh &ut);
+#endif
+#ifdef HTTS_PROSOD_EU_DURAMAIA
+	VOID utt_dur_amaia(UttPh &ut);
+#endif
+
+#ifdef HTTS_PROSOD_EU_POW1
+	VOID utt_pow1( UttPh &ut );
+#endif
+#ifdef HTTS_PROSOD_EU_POW2
+	VOID utt_pow2( UttPh &ut );
+#endif
 #ifdef HTTS_PROSOD_EU_PTH1
 	VOID utt_pth1( UttPh &ut );
 //	VOID *pth1_dummy_ptr;
 	/* Busca "dummy" para ir viendo donde se puede ir metiendo codigo
 	especifico para un metodo prosodico. */
 #endif
-#ifdef HTTS_PROSOD_EU_POW1
-	VOID utt_pow1( UttPh &ut );
+#ifdef HTTS_PROSOD_EU_PTH2
+	VOID utt_pth2( UttPh &ut );
 #endif
+
+#ifdef HTTS_PROSOD_EU_PTH3  
+        VOID utt_pth3( UttPh &ut );
+#endif
+#ifdef HTTS_PROSOD_EU_PTH3AMAIA  
+        VOID utt_pth3_amaia( UttPh &ut );
+#endif
+
+private:
 	VOID utt_emphasis( UttPh &u );
 
 protected:
@@ -360,7 +381,7 @@ private:
 	LangEU_Pauses  pau;//Aritz
 	#endif
 	PhMap map;
-
+	
 public:
 	virtual ~LangEU_LingP() {}; //needed to remove a warning
 	BOOL create( VOID );
@@ -368,6 +389,16 @@ public:
 	VOID utt_lingp( Utt *u );
 
 	VOID utt_pos( Utt *u );
+	#ifdef IXA_POS_GF
+	//--------------------------------------------------
+	//INAKI Kanpoko POS-a erabiltzeko funtzioa
+	VOID utt_extern_pos(UttWS &u);
+	//--------------------------------------
+	//--------------------------------------------------
+	//INAKI Kanpoko TaldeFuntzionala erabiltzeko funtzioa
+	VOID utt_extern_gf(UttWS &u);
+	//--------------------------------------
+	#endif
 	VOID utt_pauses( Utt *u );
 	VOID utt_phtrans( Utt *u );
 	VOID utt_prosod( Utt *u );
@@ -376,7 +407,6 @@ public:
 	VOID utt_new_val(Utt *u);//Aritz
 	VOID utt_n_val_pause(Utt *u);//Aritz
 	#endif
-
 	BOOL set( const CHAR *param, const CHAR *val );
 	const CHAR *get( const CHAR *param );
 };

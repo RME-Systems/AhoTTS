@@ -158,24 +158,37 @@ HTS_Boolean HTS_Engine_load_parameter_from_fn(HTS_Engine * engine, char **pdf_fn
 
    pdf_fp = (HTS_File **) HTS_calloc(interpolation_size, sizeof(HTS_File *));
    tree_fp = (HTS_File **) HTS_calloc(interpolation_size, sizeof(HTS_File *));
-   win_fp = (HTS_File **) HTS_calloc(window_size, sizeof(HTS_File *));
    for (i = 0; i < interpolation_size; i++) {
       pdf_fp[i] = HTS_fopen(pdf_fn[i], "rb");
       tree_fp[i] = HTS_fopen(tree_fn[i], "r");
    }
+#ifdef DEFWINS
+   // derro: if windows are not specified, null file handler
+   if (win_fn == NULL) win_fp = NULL; else {
+#endif
+   win_fp = (HTS_File **) HTS_calloc(window_size, sizeof(HTS_File *));
    for (i = 0; i < window_size; i++)
       win_fp[i] = HTS_fopen(win_fn[i], "r");
+#ifdef DEFWINS
+   }
+#endif
    result = HTS_Engine_load_parameter_from_fp(engine, pdf_fp, tree_fp, win_fp, stream_index, msd_flag, window_size, interpolation_size);
    for (i = 0; i < interpolation_size; i++) {
       HTS_fclose(pdf_fp[i]);
       HTS_fclose(tree_fp[i]);
    }
-   for (i = 0; i < window_size; i++)
-      HTS_fclose(win_fp[i]);
    HTS_free(pdf_fp);
    HTS_free(tree_fp);
+#ifdef DEFWINS
+   // derro: para las ventanas por defecto
+   if (win_fp != NULL) {
+#endif
+   for (i = 0; i < window_size; i++)
+      HTS_fclose(win_fp[i]);
    HTS_free(win_fp);
-
+#ifdef DEFWINS
+   }
+#endif
    return result;
 }
 
@@ -460,7 +473,12 @@ void HTS_Engine_load_label_from_string_list(HTS_Engine * engine, char **data, in
 /* HTS_Engine_create_sstream: parse label and determine state duration */
 HTS_Boolean HTS_Engine_create_sstream(HTS_Engine * engine)
 {
+#ifndef FIXSILS
    return HTS_SStreamSet_create(&engine->sss, &engine->ms, &engine->label, engine->global.duration_iw, engine->global.parameter_iw, engine->global.gv_iw);
+#else
+   // derro: necesitare los frames por segundo para imponer la duracion del silencio inicial y final
+   return HTS_SStreamSet_create(&engine->sss, &engine->ms, &engine->label, engine->global.duration_iw, engine->global.parameter_iw, engine->global.gv_iw, (double)engine->global.sampling_rate / (double)engine->global.fperiod);
+#endif
 }
 
 /* HTS_Engine_create_pstream: generate speech parameter vector sequence */

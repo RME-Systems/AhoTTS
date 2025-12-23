@@ -1,55 +1,3 @@
-/******************************************************************************/
-/*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-AhoTTS: A Text-To-Speech system for Basque* and Spanish*,
-developed by Aholab Signal Processing Laboratory at the
-University of the Basque Country (UPV/EHU). Its acoustic engine is based on
-hts_engine' and it uses AhoCoder* as vocoder.
-(Read COPYRIGHT_and_LICENSE_code.txt for more details)
---------------------------------------------------------------------------------
-
-Linguistic processing for Basque and Spanish, Vocoder (Ahocoder) and
-integration by Aholab UPV/EHU.
-
-*AhoCoder is an HNM-based vocoder for Statistical Synthesizers
-http://aholab.ehu.es/ahocoder/
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
-	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
-	  Country (UPV/EHU)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Licenses:
-	GPL-3.0+
-	*GPL-3.0+
-	'Modified BSD (Compatible with GNU GPL)
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-GPL-3.0+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in /usr/share/common-licenses/GPL-3.
-
-//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
-/******************************************************************************/
 /**********************************************************/
 /*/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /*
@@ -104,6 +52,312 @@ Codigo para las longitudes, {lcode} =
 		2 como 1, pero si hay un match exacto se admite aunque sea ambiguo
 Si {case_sensitive}==0 no distingue mayusculas de minusculas */
 /*******fin***de***str_match****(uti_misc.c)***************/
+
+//Aqu¡ podemos meter excepciones concretas a las reglas de transcripci¢n
+BOOL LangEU_PhTrans::es_excepcion(UttPh & u,UttI p, char caso)
+{
+	char * i_lista_excep[]=
+	{
+	"bainila",
+	"eskuina",
+	"ainitz",
+	"soilik",
+/*04/02/2005 "n"en salbuespen berriak*/
+	"kafeina",
+	"kafeinagabe",
+	"kokaina",
+	"kokainazale",
+	"ainara",
+	"heroina",
+	"britainiar",
+	"dominikar",
+	"doministiku",
+	"labainarazi",
+	"egoile",
+	"ehaile",
+	"lehenbailehen",
+	"pregoilari",
+	"thailandiar",
+	"thailandiera",
+	"eraile",
+	"iaio",
+	"iaiotasun",
+	"trabailari",
+	"beilari",
+	"habailari",
+	"kontseilari",
+	"kontseilaritza",
+	"oilarite",
+/***********************************/
+	NULL
+	};
+	char * d_lista_excep[]=
+	{
+	"addisabebar",	
+	NULL
+	};
+	char *l_lista_excep[]=
+	{
+	"iliada",
+	"ilusio",
+	"ilustra",
+	"trikitrilari",
+	"zientzilari",
+	"estilo",
+/*04/02/2005 "l"en salbuespen berriak*/
+	"lehenbailehen",
+	"antilope",
+	"argazkilari",
+	"argazkilaritza",
+	"asimilazio",
+	"auzilari",
+	"azpilan",
+	"bazilo",
+	"begiluze",
+	"bizilagun",
+	"bizileku",
+	"destilatu",
+	"dilema",
+	"disimilazio",
+	"egoile",
+	"ehaile",
+	"eraile",
+	"ertilari",
+	"eultzilari",
+	"facsimile",
+	"faksimile",
+	"filantropia",
+	"filantropiko",
+	"filantropo",
+	"filarmoniko",
+	"filatelia",
+	"filateliko",
+	"filatelista",
+	"filologia",
+	"filologiko",
+	"filologo",
+	"filosofia",
+	"filosofiko",
+	"filosofo",
+	"fusilarazi",
+	"fusilatu",
+	"fusilatze",
+	"gorila",
+	"igerilari",
+	"igerileku",
+	"irrintzilari",
+	"jauzilari",
+	"filipinar",
+	"film",
+	"ausikilari",
+	"beilari",
+	"bilari",
+	"ertilari",
+	"eultzilari",
+	"habailari",
+	"igerilari",
+	"irrintzilari",
+	"jauzilari",
+	"kontseilari",
+	"kontseilaritza",
+	"makilari",
+	"marrazkilari",
+	"murgilari",
+	"oilarite",
+	"pregoilari",
+	"trabailari",
+	"trikitilari",
+	"taxilari",
+/********************************/
+	NULL
+	};
+	char *n_lista_excep[]=
+	{
+	"ainitz",
+	"zinema",
+	"seminario",
+	"inaugu",
+	"inekuazio",
+	"inert",
+	"inizi",
+	"inozen",
+	"tonino",
+/*04/02/2005 "n"en salbuespen berriak*/
+	"kafeina",
+	"kafeinagabe",
+	"kokaina",
+	"kokainazale",
+	"pinguino",
+	"heroina",
+	"administrari",
+	"administraritza",
+	"administratibo",
+	"administratu",
+	"administratzaile",
+	"administrazio",
+	"adrenalina",
+	"aerodinamika",
+	"aerodinamiko",
+	"afinatu",
+	"afinitate",
+	"ainara",
+	"alberjinia",
+	"alkalino",
+	"alpinismo",
+	"alpinista",
+	"aluminio",
+	"argentinar",
+	"bikini",
+	"biolinista",
+	"bobina",
+	"britainiar",
+	"burkinafasoar",
+	"chisinauar",
+	"definitu",
+	"definizio",
+	"deklinabide",
+	"deklinatu",
+	"deklinazio",
+	"determinatu",
+	"determinazio",
+	"determinismo",
+	"determinista",
+	"dina",
+	"dinamika",
+	"dinamiko",
+	"dinamita",
+	"dinamo",
+	"dinastia",
+	"dinosauro",
+	"diskriminatu",
+	"diziplina",
+	"doktrina",
+	"dominikar",
+	"doministiku",
+	"domino",
+	"errinozero",
+	"estreptomizina",
+	"ezinikusi",
+	"feminismo",
+	"feminista",
+	"filipinar",
+	"final",
+	"finalaurreko",
+	"finalerdi",
+	"finalista",
+	"finantza",
+	"fini",
+	"finitu",
+	"gaizkinahi",
+	"gasolina",
+	"gillotina",
+	"gillotinatu",
+	"gineaberriar",
+	"gineabissautar",
+	"ginear",
+	"ginekologia",
+	"ginekologo",
+	"ginezeo",
+	"glizerina",
+	"handinahi",
+	"handinahikeria",
+	"handinahiko",
+	"handinahitasun",
+	"hemoglobina",
+	"hidrodinamika",
+	"infinitibo",
+	"infinitu",
+	"intsulina",
+	"jakobino",
+	"labainarazi",
+/********************************/
+	NULL
+	};
+	const char * j_lista_excep[]=
+	{
+	"jator",
+	"jende",
+	"jubila",
+/*04/02/2005 "j"en salbuespen berriak*/
+	"esponja",
+	"injineru",
+	"injinerutza",
+	"konjuntibitis",
+	"konjuru",
+	"sanjosetar",
+	"sanjuandar",
+//"alajaina",
+//"juje",
+//"ajea",
+//"ajedrez",
+//"ajola",
+//"ejerzito",
+//	"erlijio",
+//	"gizajo",
+//	"gizarajo",
+// "ijito",
+//	"lojika",
+//	"lujo",
+//	"prejuizio",
+//	"pribilejio",
+/********************************/
+	NULL
+	};
+	const char * z_lista_excep[]=
+	{
+	"brazzavilletar",	
+	NULL
+	};
+
+	BOOL encontrado=FALSE;
+	const CHAR * palabra;
+	UttI wo;
+
+	wo=u.wordThis(p, URANGE_PHRASE);
+	palabra = u.cell(wo).getWord(); // palabra actual
+
+	switch(caso)
+	{
+//	int str_match( const char * const *strarr, int nstrs,	const char * str, int lcode, int case_sensitive )
+		case 'i':
+			if(str_match(i_lista_excep, nptrs((const void * const *)i_lista_excep), palabra, -2, 0)!=-1) {
+			encontrado=TRUE;
+			}
+			break;
+/*
+		case 'd':
+			if(str_match(d_lista_excep, nptrs((const void * const *)d_lista_excep), palabra, -2, 0)!=-1) {
+			encontrado=TRUE;
+			}
+			break;
+*/
+		case 'j':
+			if(str_match(j_lista_excep, nptrs((const void * const *)j_lista_excep), palabra,-2 , 0)!=-1){
+			 encontrado=TRUE;
+			}
+			break;
+		case 'l':
+			if(str_match(l_lista_excep, nptrs((const void * const *)l_lista_excep), palabra,-2 , 0)!=-1){
+			 encontrado=TRUE;
+			}
+			break;
+		case 'n':
+			if(str_match(n_lista_excep, nptrs((const void * const *)n_lista_excep), palabra,-2 , 0)!=-1){
+			 encontrado=TRUE;
+			}
+			break;
+/*
+		case 'z':
+			if(str_match(z_lista_excep, nptrs((const void * const *)z_lista_excep), palabra,-2 , 0)!=-1){
+			 encontrado=TRUE;
+			}
+			break;
+*/
+		default:
+			break;
+	}
+	return(encontrado);
+}
 
 /**********************************************************/
 

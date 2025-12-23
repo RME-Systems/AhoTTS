@@ -163,7 +163,9 @@ HTS_Boolean HTS_get_pattern_token(HTS_File * fp, char *buff)
       return FALSE;
    c = HTS_fgetc(fp);
 
-   while (c == ' ' || c == '\n') {
+   // derro: consider \r as well
+   //while (c == ' ' || c == '\n') {
+   while (c == ' ' || c=='\r' || c == '\n') {
       if (HTS_feof(fp))
          return FALSE;
       c = HTS_fgetc(fp);
@@ -199,6 +201,9 @@ HTS_Boolean HTS_get_pattern_token(HTS_File * fp, char *buff)
       if (!squote && !dquote) {
          if (c == ' ')
             break;
+         // derro: consider \r as well
+         if (c == '\r')
+            break;
          if (c == '\n')
             break;
          if (HTS_feof(fp))
@@ -219,13 +224,17 @@ HTS_Boolean HTS_get_token(HTS_File * fp, char *buff)
    if (fp == NULL || HTS_feof(fp))
       return FALSE;
    c = HTS_fgetc(fp);
-   while (c == ' ' || c == '\n' || c == '\t') {
+   // derro: consider \r as well
+   //while (c == ' ' || c == '\n' || c == '\t') {
+   while (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
       if (HTS_feof(fp))
          return FALSE;
       c = HTS_fgetc(fp);
    }
 
-   for (i = 0; c != ' ' && c != '\n' && c != '\t';) {
+   // derro: consider \r as well
+   //for (i = 0; c != ' ' && c != '\n' && c != '\t';) {
+   for (i = 0; c != ' ' && c != '\r' && c != '\n' && c != '\t';) {
       buff[i++] = c;
       if (HTS_feof(fp))
          break;
@@ -248,12 +257,16 @@ HTS_Boolean HTS_get_token_from_string(char *string, int *index, char *buff)
    c = string[(*index)++];
    if (c == '\0')
       return FALSE;
-   while (c == ' ' || c == '\n' || c == '\t') {
+   // derro: consider \r as well
+   //while (c == ' ' || c == '\n' || c == '\t') {
+   while (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
       if (c == '\0')
          return FALSE;
       c = string[(*index)++];
    }
-   for (i = 0; c != ' ' && c != '\n' && c != '\t' && c != '\0'; i++) {
+   // derro: consider \r as well
+   //for (i = 0; c != ' ' && c != '\n' && c != '\t' && c != '\0'; i++) {
+   for (i = 0; c != ' ' && c != '\r' && c != '\n' && c != '\t' && c != '\0'; i++) {
       buff[i] = c;
       c = string[(*index)++];
    }

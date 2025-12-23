@@ -182,7 +182,7 @@ int main(int argc, char * argv[]){
 
 ///////////////////////////////////////////
 // CREATE AN OUTPUT WAV FILE
-
+	printf("Creating output audio file: %s\n", output_file);
 	CAudioFile fout;
 	fout.open(output_file,"w", "SRate=16000.0 NChan=1 FFormat=Wav"); //Mono, 16kHz
 ///////////////////////////////////////////
@@ -211,7 +211,7 @@ int main(int argc, char * argv[]){
 			short *samples;
 			int len=0;
 			//PROCESS A SENTENCE FROM THE TEXT AND GET "len" samples
-			while((len = tts->output_multilingual(lang, &samples)) != 0){
+			while((len = tts->output_multilingual(lang, &samples)) != -1){  //-1 means that all the input has been processed (added by me). Returns 0 if no samples generated
 				//samples are stored in the audio file, but could also be directed to the soundcard
 				fout.setBlk(samples, len);
 				free(samples);
@@ -221,7 +221,6 @@ int main(int argc, char * argv[]){
 
 	
 ///////////////////////////////////////////
-
 	//CLOSE THE AUDIOFILE
 	fout.close();
 

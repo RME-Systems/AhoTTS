@@ -17,9 +17,9 @@ http://aholab.ehu.es/ahocoder/
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Copyrights:
-	1997-2015  Aholab Signal Processing Laboratory, University of the Basque
+	1997-2012  Aholab Signal Processing Laboratory, University of the Basque
 	 Country (UPV/EHU)
-    *2011-2015 Aholab Signal Processing Laboratory, University of the Basque
+    *2011-2012 Aholab Signal Processing Laboratory, University of the Basque
 	  Country (UPV/EHU)
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -50,7 +50,7 @@ GPL-3.0+
 
 //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 /******************************************************************************/
-// Versión reducida de AHOcoder para hts_engine
+// Versiï¿½n reducida de AHOcoder para hts_engine
 // Daniel Erro, AHOLAB, Bilbao 2012
 
 #include <math.h>
@@ -64,10 +64,10 @@ GPL-3.0+
 #define MINGENF0 10.0     // minima f0 generable (limitador por bajo pa no saturar memoria)
 #define MAXGENF0 1500.0   // maxima f0 generable (limitador por alto pa no filtrar paso alto cuando no tiene sentido)
 #define MINGENFV 1000.0   // minima fv generable (limitador por bajo pa que no haya falsas zonas unvoiced)
-#define DEFFV 4500.0      // si no hay modelado explícito de fvoicing, este será el valor de referencia
+#define DEFFV 4500.0      // si no hay modelado explï¿½cito de fvoicing, este serï¿½ el valor de referencia
 #define ATT0HZ -32.0      // atenuacion del filtro paso-alto del ruido a 0hz
 #define ATT08FV -20.0     // atenuacion del filtro paso-alto del ruido a 0.8 veces la fv
-#define F0UV 100.0        // cuando haya que asignar una f0 al ruido, se tomará este valor
+#define F0UV 100.0        // cuando haya que asignar una f0 al ruido, se tomarï¿½ este valor
 #define OLANOISE 0.193322 // factor para el ruido cuando se genere por overlap-add (=log(1.2132))
 #define DCWINS 2.0        // factor de forma de la ventana de ruido
 #define ADAPTLEVELS 1     // niveles adaptados (1) o no (0) a los de la demo straight
@@ -124,7 +124,7 @@ int ifftr(int N,double *xre,double *xim) {
 	return 0;
 }
 
-/********** Funciones de álgebra matricial **********/
+/********** Funciones de ï¿½lgebra matricial **********/
 
 int prodmat(double *A,double *b,double *c,unsigned int FA,unsigned int CA) {
 	// producto de matriz por vector
@@ -134,17 +134,17 @@ int prodmat(double *A,double *b,double *c,unsigned int FA,unsigned int CA) {
 	return 0;
 }
 
-/********** Funciones de armónicos **********/
+/********** Funciones de armï¿½nicos **********/
 
 unsigned int hanoharms(double fs,double fmax,double f0) {
-	// número de armónicos de una señal entre 0 y min{fmax,fs/2}
+	// nï¿½mero de armï¿½nicos de una seï¿½al entre 0 y min{fmax,fs/2}
 	if (f0>=fmax || f0>=0.5*fs) return 0;
 	else if (fmax>0.5*fs) return (unsigned int)ceil(0.5*fs/f0)-1;
 	else return (unsigned int)ceil(fmax/f0)-1;
 }
 
 int genharmonics(double *trama,unsigned int N12,unsigned int N23,double fs,double f0,unsigned int K,double *aa,double *pp,double alfa,char wins) {
-	// genera un cacho de señal armonica y lo suma a lo que hubiera
+	// genera un cacho de seï¿½al armonica y lo suma a lo que hubiera
 	// ademas, si wins=1 enventana lo que hubiera antes, siendo ideal para cuando me dan un frame con ruido
 	double fact,w,w0,cosdw0,sindw0,cosdw,sindw,cosw,sinw,aux1,aux2;
 	unsigned int k,n,N13=N12+N23; //N12=n2-n1,N23=n3-n2,N13=n3-n1;
@@ -164,7 +164,7 @@ int genharmonics(double *trama,unsigned int N12,unsigned int N23,double fs,doubl
 
 int resamplelogampenv(double f01,double *logaa1,unsigned int K1,double f02,double *logaa2,unsigned int K2) {
 	// remuestreo de envolvente en log-amplitud
-	// nota: el intervalo k1 es el situado entre k1·f01 y (k1+1)·f01)
+	// nota: el intervalo k1 es el situado entre k1ï¿½f01 y (k1+1)ï¿½f01)
 	unsigned int k1,k2;
 	double fA,fB,aA,aB,fk2;
 	if ((K1==0)||(K2==0)) return -1;
@@ -181,8 +181,8 @@ int resamplelogampenv(double f01,double *logaa1,unsigned int K1,double f02,doubl
 
 int gennoisefromlogspectrum(double *X,unsigned int Lp2,double fs) {
 	// genera trama de ruido a partir del log-espectro, poniendo fase aleatoria e invirtiendo la fft
-	// ATENCION: X DEBE TRAER TAMAÑO 2·Lp2
-	// ojo, en realidad basta que me pasen como entrada sólo las primeras Lp2/2 muestras (incluso sin la primera), pero que los buffers tengan tamaño para todas, claro
+	// ATENCION: X DEBE TRAER TAMAï¿½O 2ï¿½Lp2
+	// ojo, en realidad basta que me pasen como entrada sï¿½lo las primeras Lp2/2 muestras (incluso sin la primera), pero que los buffers tengan tamaï¿½o para todas, claro
 	double *Xbuff,ph,fact=2.0*PI/(double)RAND_MAX,scale=sqrt(fs/(double)Lp2);
 	unsigned int n,Lp22=Lp2>>1;
 	Xbuff=X+Lp2;
@@ -214,7 +214,7 @@ unsigned int getwinlengthceilpot2(unsigned int L) {
 	return Lp2;
 }
 
-/********** Funciones de reconstrucción sobre CC **********/
+/********** Funciones de reconstrucciï¿½n sobre CC **********/
 
 double fwarp(double w,double alfa) {
 	// warpea una determinada w segun alfa
@@ -268,18 +268,18 @@ int applyantihpfilter(unsigned int K,double f0,double *aa,double fv) {
 int cc2waveform(double *x,unsigned int Lx,double fs,unsigned int Lframe,unsigned int Nframes,double **f0s,double **fvs,unsigned int ord,double **CC,double alfa) {
 	unsigned int k,kk,Kmax,K,Kuv,pm,Lp2;
 	double *Huv,*Hc,*Hs,*aa,*pp,*ee,*cc,*trama,f0min,c0max,c0min,fv,fact,phlin,f0,f0ant;
-	// inicializo la señal a ceros
+	// inicializo la seï¿½al a ceros
 	for (k=0;k<Lx;k++) x[k]=0.0;
 	// miro el pitch minimo encontrado para determinar Kmax y reservar espacio pa la matriz de voiced
 	for (f0min=DBL_MAX,k=0;k<Nframes;k++) if (f0s[k][0]>0.0 && f0s[k][0]<f0min) f0min=f0s[k][0]; f0min=exp(f0min); if (f0min<MINGENF0) f0min=MINGENF0;
-	// calculo los valores maximo y minimo de c0, con los que mapearé la maximum voicing frequency si es caso
+	// calculo los valores maximo y minimo de c0, con los que mapearï¿½ la maximum voicing frequency si es caso
 	if (fvs==NULL) for (k=0,c0min=DBL_MAX,c0max=-DBL_MAX;k<Nframes;k++) { cc=CC[k]; if (f0s[k][0]>0.0 && cc[0]>c0max) c0max=cc[0]; if (cc[0]<c0min) c0min=cc[0]; }
 	// saco el maximo numero esperable de armonicos para hacer reserva de memoria
 	Kmax=hanoharms(fs,fs,f0min); Kuv=hanoharms(fs,fs,F0UV);
 	// matrices
 	Hc=(double *)malloc(((Kmax<<1)+Kuv)*(ord+1)*sizeof(double)); Hs=Hc+Kmax*(ord+1); Huv=Hs+Kmax*(ord+1);
 	ccmatrixcreate(ord,Kuv,F0UV,fs,alfa,Huv,NULL); // la estocastica la hago como muestrear a 100hz
-	// reservo memoria para las cosillas que iré sacando
+	// reservo memoria para las cosillas que irï¿½ sacando
 	aa=(double *)malloc(((Kmax<<1)+Kuv)*sizeof(double)); pp=aa+Kmax; ee=pp+Kmax;
 	Lp2=getwinlengthceilpot2(Lframe<<1);
 	trama=(double *)malloc((Lp2<<1)*sizeof(double));
@@ -289,7 +289,7 @@ int cc2waveform(double *x,unsigned int Lx,double fs,unsigned int Lframe,unsigned
 		cc=CC[k]; f0=exp(f0s[k][0]); if (f0<MINGENF0 || f0>MAXGENF0) f0=0.0;
 		// reescalar c0 si es caso (los coefs restantes ya se reescalan implicitamente en ccmatrixcreate)
 		if (ADAPTLEVELS==1) cc[0]-=5.0;
-		// primero vamos con la parte del ruido, común a todos los frames, incluyendo factor ruido overlap-add
+		// primero vamos con la parte del ruido, comï¿½n a todos los frames, incluyendo factor ruido overlap-add
 		cc[0]+=OLANOISE; prodmat(Huv,cc,ee,Kuv,ord+1); cc[0]-=OLANOISE;
 		// filtrado paso alto a partir de fv si es voiced
 		if (f0>0.0) {
@@ -300,11 +300,11 @@ int cc2waveform(double *x,unsigned int Lx,double fs,unsigned int Lframe,unsigned
 			// aplicar el highpass (siempre que haya armonicos, claro)
 			if (fv<=f0) f0=0.0; else applyhpfilterlog(Kuv,F0UV,ee,fv);
 		}
-		// remuestreo al tamaño de la fft de sintesis
+		// remuestreo al tamaï¿½o de la fft de sintesis
 		resamplelogampenv(F0UV,ee,Kuv,fs/(double)Lp2,trama+1,(Lp2>>1)-1);
 		// generacion del trocito de ruido
 		gennoisefromlogspectrum(trama,Lp2,fs);
-		// luego ya los armónicos
+		// luego ya los armï¿½nicos
 		if (f0>0.0) {
 			// numero de armonicos
 			K=hanoharms(fs,fv,f0);
@@ -316,11 +316,11 @@ int cc2waveform(double *x,unsigned int Lx,double fs,unsigned int Lframe,unsigned
 			for (fact=2.0*sqrt(f0),kk=0;kk<K;kk++) aa[kk]=fact*exp(aa[kk]);
 			// antifiltro de ruido
 			applyantihpfilter(K,f0,aa,fv);
-			// fase mínima por muestreo de la envolvente complementaria
+			// fase mï¿½nima por muestreo de la envolvente complementaria
 			prodmat(Hs,cc,pp,K,ord+1);
 			// termino lineal de fase a partir de f0
 			if (f0ant>0.0) phlin+=(f0+f0ant)*PI*(double)Lframe/fs; else phlin=0.0;
-			// añado los armonicos al ruido ya generado
+			// aï¿½ado los armonicos al ruido ya generado
 			genharmonics(trama,Lframe,Lframe,fs,f0,K,aa,pp,phlin,1);
 		}
 		// overlap-add de la trama final
@@ -330,7 +330,7 @@ int cc2waveform(double *x,unsigned int Lx,double fs,unsigned int Lframe,unsigned
 		// acumulo f0 pa la siguiente
 		f0ant=f0;
 	}
-	// libero memoria (recuerda que había una sola reserva para varias matrices y vectores)
+	// libero memoria (recuerda que habï¿½a una sola reserva para varias matrices y vectores)
 	free(Hc); free(aa); free(trama);
 	// normalizar si es caso
 	if (AMPNORMALIZE==1) wavampnormalize(Lx,x);
@@ -339,11 +339,14 @@ int cc2waveform(double *x,unsigned int Lx,double fs,unsigned int Lframe,unsigned
 }
 
 /********** Funciones visibles desde fuera **********/
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 int gen_ahocoder_waveform(short *s,unsigned int Ls,unsigned int sr,unsigned int Lframe,unsigned int Nframes,double **lf0s,double **fv,unsigned int ord,double alfa,double **CC) {
-	// descarte de casos patológicos
+	// descarte de casos patolï¿½gicos
 	if (s==NULL || Ls==0 || Lframe==0 || Nframes==0 || lf0s==NULL || CC==NULL) return -1;	
-	// llamo a la funcion de generacion convirtiendo las entradas
+	// llamo a la funcion degned int Ls,unsigned int sr,unsigned int Lframe,unsigned int Nframes,double **lf0s,double **fv,unsigned int ord,double alfa,double **CC) {
+	// descarte de casos patolï¿½gicos generacion convirtiendo las entradas
 	cc2waveform((double *)s,Ls,(double)sr,Lframe,Nframes,lf0s,fv,ord,CC,alfa);
 	// sobreescribo convirtiendo los doubles en shorts como procede
 	wavdouble2short(Ls,(double *)s,s);
@@ -352,6 +355,9 @@ int gen_ahocoder_waveform(short *s,unsigned int Ls,unsigned int sr,unsigned int 
 }
 
 unsigned int get_ahocoder_waveform_length(unsigned int Lframe,unsigned int Nframes) {
-	// devuelve el tamaño que ha de tener la señal x si viene caracterizada por [Nframes] vectores sacados cada [Lframe] muestras
+	// devuelve el tamaï¿½o que ha de tener la seï¿½al x si viene caracterizada por [Nframes] vectores sacados cada [Lframe] muestras
 	return (Nframes+1)*Lframe+1;
 }
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif

@@ -120,6 +120,7 @@ typedef struct _HTS_Audio {
    HTS_Boolean now_buff_1;      /* double buffering flag */
    HTS_Boolean now_buff_2;      /* double buffering flag */
    WAVEHDR buff_1;              /* buffer */
+
    WAVEHDR buff_2;              /* buffer */
 } HTS_Audio;
 #endif                          /* AUDIO_PLAY_WIN32 || AUDIO_PLAY_WINCE */
@@ -234,6 +235,8 @@ typedef struct _HTS_ModelSet {
 } HTS_ModelSet;
 
 /*  ----------------------- model method --------------------------  */
+
+#define DEFWINS // derro: use default windows [-0.5 0 0.5] and [1 -2 1] if not specified as input
 
 /* HTS_ModelSet_initialize: initialize model set */
 void HTS_ModelSet_initialize(HTS_ModelSet * ms, int nstream);
@@ -408,11 +411,18 @@ typedef struct _HTS_SStreamSet {
 
 /*  ----------------------- sstream method ------------------------  */
 
+//#define FUSION  // derro (modificado de inaki): si FUSION no esta comentada, se combinaran las duraciones HTS con las halladas en las labels (OJO con las dependencias foneticas en HTS_sstream.c)
+#define FIXSILS // derro: fijar duracion de silencio inicial y final
+
 /* HTS_SStreamSet_initialize: initialize state stream set */
 void HTS_SStreamSet_initialize(HTS_SStreamSet * sss);
 
 /* HTS_SStreamSet_create: parse label and determine state duration */
+#ifndef FIXSILS
 HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms, HTS_Label * label, double *duration_iw, double **parameter_iw, double **gv_iw);
+#else
+HTS_Boolean HTS_SStreamSet_create(HTS_SStreamSet * sss, HTS_ModelSet * ms, HTS_Label * label, double *duration_iw, double **parameter_iw, double **gv_iw, double frps);
+#endif
 
 /* HTS_SStreamSet_get_nstream: get number of stream */
 int HTS_SStreamSet_get_nstream(HTS_SStreamSet * sss);
@@ -536,6 +546,10 @@ int HTS_PStreamSet_get_total_frame(HTS_PStreamSet * pss);
 
 /* HTS_PStreamSet_get_parameter: get parameter */
 double HTS_PStreamSet_get_parameter(HTS_PStreamSet * pss, int stream_index, int frame_index, int vector_index);
+
+/* HTS_PStreamSet_set_parameter: set parameter */
+//Iñaki
+void HTS_PStreamSet_set_parameter(HTS_PStreamSet * pss, int stream_index, int frame_index, int vector_index, double value);
 
 /* HTS_PStreamSet_get_parameter_vector: get parameter vector */
 double *HTS_PStreamSet_get_parameter_vector(HTS_PStreamSet * pss, int stream_index, int frame_index);
